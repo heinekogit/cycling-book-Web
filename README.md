@@ -18,4 +18,17 @@ npm run build
 
 `.env.example`を基に`.env.local`へSupabase等のブラウザ公開設定を用意します。
 
+## GitHub Pages
+
+`main`ブランチへの更新は、`.github/workflows/deploy-pages.yml`から自動公開されます。
+
+GitHub Actionsで使用するRepository secrets:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_MAPBOX_TOKEN`
+
+GitHubの **Settings → Pages → Build and deployment → Source** では **GitHub Actions** を選択します。
+このリポジトリの公開URLは `https://heinekogit.github.io/cycling-book-Web/` です。
+
 最新の既存版は `/Users/dev_tomo/Desktop/cy2` にあります。既存HTMLを原本として参照し、画面単位でReactへ移行します。

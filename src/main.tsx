@@ -8,9 +8,12 @@ import { AuthProvider } from './features/auth/AuthProvider'
 import { LocaleProvider } from './features/i18n/LocaleProvider'
 import './styles/global.css'
 
+const baseUrl = import.meta.env.BASE_URL
+const basename = baseUrl === '/' ? '/' : baseUrl.replace(/\/$/, '')
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <LocaleProvider>
         <AuthProvider>
           <App />
