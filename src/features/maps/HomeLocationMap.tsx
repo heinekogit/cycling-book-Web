@@ -1,6 +1,7 @@
 import { divIcon, type LeafletMouseEvent, type Marker as LeafletMarker } from 'leaflet'
 import { useEffect, useMemo, useRef } from 'react'
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { useLocale } from '../i18n/LocaleProvider'
 
 export type HomeLocation = { lat: number; lng: number }
 const defaultLocation: HomeLocation = { lat: 35.681236, lng: 139.767125 }
@@ -15,6 +16,7 @@ function MapInteraction({ location, onChange }: { location: HomeLocation | null;
 }
 
 export function HomeLocationMap({ location, onChange }: { location: HomeLocation | null; onChange: (location: HomeLocation) => void }) {
+  const { t } = useLocale()
   const markerRef = useRef<LeafletMarker>(null)
   const icon = useMemo(() => divIcon({ className: 'home-marker-shell', html: '<span class="home-marker-dot"></span>', iconSize: [30, 38], iconAnchor: [15, 36] }), [])
   const handlers = useMemo(() => ({ dragend: () => {
@@ -28,6 +30,6 @@ export function HomeLocationMap({ location, onChange }: { location: HomeLocation
       <MapInteraction location={location} onChange={onChange} />
       {location && <Marker ref={markerRef} position={[location.lat, location.lng]} draggable icon={icon} eventHandlers={handlers} />}
     </MapContainer>
-    <div className="profile-map-help">地図をクリックするか、マーカーを動かして地点を選択</div>
+    <div className="profile-map-help">{t('profileSettings.mapHelp')}</div>
   </div>
 }
