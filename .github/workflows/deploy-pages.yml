@@ -1,8 +1,7 @@
 name: Deploy Cycling Book Web to GitHub Pages
 
 on:
-  push:
-    branches: [main]
+  # 開発中はPagesを自動公開しない。一般公開時にpushトリガーを戻す。
   workflow_dispatch:
 
 permissions:

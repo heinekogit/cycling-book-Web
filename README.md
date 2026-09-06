@@ -20,7 +20,8 @@ npm run build
 
 ## GitHub Pages
 
-`main`ブランチへの更新は、`.github/workflows/deploy-pages.yml`から自動公開されます。
+開発中はGitHub Pagesを停止しており、`.github/workflows/deploy-pages.yml`は手動実行だけに制限しています。
+一般公開時に`main`ブランチの自動公開を再開します。
 
 GitHub Actionsで使用するRepository secrets:
 
