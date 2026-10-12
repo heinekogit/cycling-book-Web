@@ -35,7 +35,7 @@ export function SignUpPage() {
   return <main className="narrow-page"><section className="form-card">
     <p className="eyebrow">{t('auth.signupEyebrow')}</p><h1>{t('auth.signupTitle')}</h1>
     <p className="form-description">{t('auth.signupDescription')}</p>
-    {success ? <p className="form-success" role="status">{t('auth.signupSent')}</p> : <form onSubmit={(event) => void handleSubmit(event)}>
+    {success ? <><p className="form-success" role="status">{t('auth.signupSent')}</p><div className="auth-links"><Link to="/forgot-password">{t('auth.forgotLink')}</Link></div></> : <form onSubmit={(event) => void handleSubmit(event)}>
       <label htmlFor="signup-email">{t('login.email')}</label>
       <input id="signup-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isSubmitting} />
       <label htmlFor="signup-password">{t('login.password')}</label>
