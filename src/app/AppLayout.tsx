@@ -39,7 +39,10 @@ export function AppLayout() {
         {!isLoading && (session ? <>
           <Link className="button button-quiet" to="/mypage">{t('nav.myPage')}</Link>
           <button className="button button-quiet" type="button" onClick={() => void handleSignOut()}>{t('nav.logout')}</button>
-        </> : <Link className="button button-quiet" to={`/login?returnTo=${returnTo}`}>{t('nav.login')}</Link>)}
+        </> : <>
+          <Link className="button button-quiet" to="/signup">{t('auth.signupLink')}</Link>
+          <Link className="button button-quiet" to={`/login?returnTo=${returnTo}`}>{t('nav.login')}</Link>
+        </>)}
       </nav>
     </header>
     <Outlet />
