@@ -53,7 +53,7 @@ export function PublicProfilePage() {
         {routes.length === 0 ? <div className="state-panel">{t('profile.empty')}</div> : <div className="route-grid">
           {routes.map((route, index) => <Link className="route-card" to={`/routes/${route.id}`} key={route.id}>
             <div className="route-card-number">{String(index + 1).padStart(2, '0')}</div>
-            <div className="route-card-body"><h3>{route.name || t('explore.untitled')}</h3><div className="route-meta"><span>{route.created_at ? formatDate(route.created_at) : t('route.dateNotSet')}</span><span>{route.distance_m == null ? t('profile.distanceNotSet') : `${formatNumber(Number(route.distance_m) / 1000, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km`}</span></div></div>
+            <div className="route-card-body"><h3>{route.name || t('explore.untitled')}</h3><div className="route-meta"><span>{route.created_at ? formatDate(route.created_at) : t('route.dateNotSet')}</span><span>{route.distance_m == null ? t('profile.distanceNotSet') : `${formatNumber(Number(route.distance_m) / 1000, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km`}</span><span>{t('route.copyCount', { count: route.copy_count || 0 })}</span></div></div>
             <span className="route-card-arrow" aria-hidden="true">→</span>
           </Link>)}
         </div>}

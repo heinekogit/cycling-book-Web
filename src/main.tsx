@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import 'leaflet/dist/leaflet.css'
 
 import { App } from './App'
+import { AccountProvider } from './features/accounts/AccountProvider'
 import { AuthProvider } from './features/auth/AuthProvider'
 import { LocaleProvider } from './features/i18n/LocaleProvider'
 import './styles/global.css'
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter basename={basename}>
       <LocaleProvider>
         <AuthProvider>
-          <App />
+          <AccountProvider>
+            <App />
+          </AccountProvider>
         </AuthProvider>
       </LocaleProvider>
     </BrowserRouter>

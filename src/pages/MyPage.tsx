@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
-import { getAccountId } from '../features/auth/account'
+import { useAccount } from '../features/accounts/AccountProvider'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useLocale } from '../features/i18n/LocaleProvider'
 import { deleteOwnedRecord, getMyRoutes, getMyRuns, type MyRoute, type MyRun } from '../features/mypage/api'
@@ -10,26 +10,27 @@ type Tab = 'routes' | 'runs'
 
 export function MyPage() {
   const { session, isLoading: isAuthLoading } = useAuth()
+  const { activeAccount, activeAccountId: accountId, isLoading: isAccountLoading } = useAccount()
   const { formatDate, formatNumber, t } = useLocale()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab: Tab = searchParams.get('tab') === 'runs' ? 'runs' : 'routes'
-  const [accountId, setAccountId] = useState<string | number | null>(null)
   const [routes, setRoutes] = useState<MyRoute[]>([])
   const [runs, setRuns] = useState<MyRun[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    if (isAuthLoading || !session?.user.id) return
+    if (isAuthLoading || isAccountLoading || !session?.user.id || !accountId) return
     let isMounted = true
-    void getAccountId(session.user.id).then(async (nextAccountId) => {
-      if (!nextAccountId) throw new Error('アカウント情報が見つかりません')
-      const [nextRoutes, nextRuns] = await Promise.all([getMyRoutes(nextAccountId), getMyRuns(nextAccountId)])
+    void Promise.all([
+      getMyRoutes(accountId),
+      activeAccount?.accountType === 'personal' ? getMyRuns(accountId) : Promise.resolve([]),
+    ]).then(([nextRoutes, nextRuns]) => {
       if (!isMounted) return
-      setAccountId(nextAccountId); setRoutes(nextRoutes); setRuns(nextRuns); setStatus('ready')
+      setRoutes(nextRoutes); setRuns(nextRuns); setStatus('ready')
     }).catch((error) => { console.error('マイページを読み込めませんでした', error); if (isMounted) setStatus('error') })
     return () => { isMounted = false }
-  }, [isAuthLoading, session?.user.id])
+  }, [accountId, activeAccount?.accountType, isAccountLoading, isAuthLoading, session?.user.id])
 
   const changeTab = (nextTab: Tab) => setSearchParams(nextTab === 'routes' ? {} : { tab: 'runs' }, { replace: true })
   const dateLabel = (value: string | null) => value ? formatDate(value, { dateStyle: 'medium', timeStyle: 'short' }) : t('route.dateNotSet')
@@ -57,20 +58,20 @@ export function MyPage() {
     }
   }
 
-  if (isAuthLoading) return <main className="mypage"><div className="state-panel">{t('explore.checkingLogin')}</div></main>
+  if (isAuthLoading || isAccountLoading) return <main className="mypage"><div className="state-panel">{t('explore.checkingLogin')}</div></main>
   if (!session) return <main className="mypage"><section className="state-panel"><p className="eyebrow">MEMBERS ONLY</p><h1>{t('mypage.loginRequired')}</h1><p>{t('mypage.loginDescription')}</p><Link className="button button-primary" to="/login?returnTo=/mypage">{t('mypage.loginAction')}</Link></section></main>
+  if (!accountId) return <main className="mypage"><div className="state-panel state-error">{t('mypage.loadError')}</div></main>
 
   return <main className="mypage">
     <section className="mypage-heading">
-      <div><p className="eyebrow">MY CYCLING BOOK</p><h1>{t('mypage.title')}</h1><p>{session.user.email}</p></div>
-      <div className="mypage-actions"><Link className="button button-primary" to="/routes/new">{t('mypage.createRoute')}</Link>{accountId && <Link className="button button-quiet" to={`/riders/${accountId}`}>{t('mypage.viewPublic')}</Link>}<Link className="button button-quiet" to="/profile">{t('mypage.profileSettings')}</Link></div>
+      <div><p className="eyebrow">MY CYCLING BOOK</p><h1>{t('mypage.title')}</h1><p>{activeAccount?.displayName || session.user.email}</p></div>
+      <div className="mypage-actions"><Link className="button button-primary" to="/routes/new">{t('mypage.createRoute')}</Link><Link className="button button-quiet" to="/import/gpx">{t('gpx.action')}</Link>{accountId && <Link className="button button-quiet" to={`/riders/${accountId}`}>{t('mypage.viewPublic')}</Link>}<Link className="button button-quiet" to="/profile">{t('mypage.profileSettings')}</Link></div>
     </section>
 
-    <div className="mypage-summary" aria-label={t('mypage.summaryLabel')}><div><strong>{formatNumber(routes.length)}</strong><span>{t('mypage.routeCount')}</span></div><div><strong>{formatNumber(runs.length)}</strong><span>{t('mypage.runCount')}</span></div></div>
     {message && <div className="mypage-message" role="status">{message}</div>}
     <div className="mypage-tabs" role="tablist" aria-label={t('mypage.tabsLabel')}>
-      <button type="button" role="tab" aria-selected={tab === 'routes'} className={tab === 'routes' ? 'active' : ''} onClick={() => changeTab('routes')}>{t('mypage.routesTab')}</button>
-      <button type="button" role="tab" aria-selected={tab === 'runs'} className={tab === 'runs' ? 'active' : ''} onClick={() => changeTab('runs')}>{t('mypage.runsTab')}</button>
+      <button type="button" role="tab" aria-selected={tab === 'routes'} className={tab === 'routes' ? 'active' : ''} onClick={() => changeTab('routes')}><strong>{formatNumber(routes.length)}</strong><span>{t('mypage.routesTab')}</span></button>
+      <button type="button" role="tab" aria-selected={tab === 'runs'} className={tab === 'runs' ? 'active' : ''} onClick={() => changeTab('runs')}><strong>{formatNumber(runs.length)}</strong><span>{t('mypage.runsTab')}</span></button>
     </div>
 
     {status === 'loading' && <div className="panel-loading mypage-loading">{t('mypage.loading')}</div>}
@@ -83,7 +84,7 @@ export function MyPage() {
     </RecordList>}
     {status === 'ready' && tab === 'runs' && <RecordList empty={t('mypage.runsEmpty')}>
       {runs.map((run) => <article className="record-card" key={run.id}>
-        <Link className="record-main" to={`/runs/${run.id}`}><div className="record-title"><h2>{run.name || dateLabel(run.started_at || run.created_at)}</h2></div><p>{dateLabel(run.created_at || run.started_at)}</p><div className="record-meta"><span>{distanceLabel(run.distance_m)}</span><span>{durationLabel(run.duration_s)}</span></div></Link>
+        <Link className="record-main" to={`/runs/${run.id}`}><div className="record-title"><h2>{run.name || dateLabel(run.started_at || run.created_at)}</h2>{run.has_photos && <span className="record-photo-icon" role="img" aria-label={t('mypage.hasPhotos')} title={t('mypage.hasPhotos')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5 10 3h4l1.5 2.5H19a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8.5a3 3 0 0 1 3-3h3.5ZM12 18a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0-2a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" /></svg></span>}</div><p>{dateLabel(run.created_at || run.started_at)}</p><div className="record-meta"><span>{distanceLabel(run.distance_m)}</span><span>{durationLabel(run.duration_s)}</span></div></Link>
         <button className="record-delete" type="button" onClick={() => void deleteRecord('runs', run.id)} aria-label={t('mypage.deleteAria', { name: run.name || t('mypage.deleteRunLabel') })}>{t('mypage.delete')}</button>
       </article>)}
     </RecordList>}

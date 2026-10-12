@@ -2,10 +2,9 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { safeReturnTo } from '../features/auth/redirect'
 import { useLocale } from '../features/i18n/LocaleProvider'
 import { supabase } from '../lib/supabase'
-
-const safeReturnTo = (value: string | null) => value?.startsWith('/') && !value.startsWith('//') ? value : '/'
 
 export function LoginPage() {
   const { session, isLoading } = useAuth()
@@ -43,6 +42,8 @@ export function LoginPage() {
       <label htmlFor="password">{t('login.password')}</label><input id="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} disabled={isSubmitting} />
       {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
       <button className="button button-primary submit-button" type="submit" disabled={isSubmitting}>{isSubmitting ? t('login.submitting') : t('login.submit')}</button>
-    </form><Link className="back-link" to="/">{t('login.back')}</Link>
+    </form>
+    <div className="auth-links"><Link to="/signup">{t('auth.signupLink')}</Link><Link to="/forgot-password">{t('auth.forgotLink')}</Link></div>
+    <Link className="back-link" to="/">{t('login.back')}</Link>
   </section></main>
 }

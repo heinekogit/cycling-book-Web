@@ -56,7 +56,7 @@ export function ExplorePage() {
       {status === 'ready' && routes.length > 0 && <div className="route-grid">
         {routes.map((route, index) => <Link className="route-card" to={`/routes/${route.id}`} key={route.id}>
           <div className="route-card-number">{String(index + 1).padStart(2, '0')}</div>
-          <div className="route-card-body"><h3>{route.name || t('explore.untitled')}</h3><div className="route-meta"><span>{route.created_at ? formatDate(route.created_at) : '—'}</span><span>{photoCounts[String(route.id)] ? t('explore.photos', { count: photoCounts[String(route.id)] }) : t('explore.noPhotos')}</span></div></div>
+          <div className="route-card-body"><h3>{route.name || t('explore.untitled')}</h3><div className="route-meta"><span>{route.created_at ? formatDate(route.created_at) : '—'}</span><span>{photoCounts[String(route.id)] ? t('explore.photos', { count: photoCounts[String(route.id)] }) : t('explore.noPhotos')}</span><span>{t('route.copyCount', { count: route.copy_count || 0 })}</span></div></div>
           <span className="route-card-arrow" aria-hidden="true">→</span>
         </Link>)}
       </div>}

@@ -19,6 +19,7 @@ export type PublicProfileRoute = {
   name: string | null
   created_at: string | null
   distance_m: number | null
+  copy_count: number
 }
 
 const columns = 'id,account_id,display_name,profile_image,home_lat,home_lng,home_name'
@@ -36,19 +37,15 @@ export async function updateProfile(userId: string, values: ProfileUpdate) {
 }
 
 export async function getPublicProfile(accountId: string) {
-  const { data, error } = await supabase
-    .from('users')
-    .select('account_id,display_name,profile_image')
-    .eq('account_id', accountId)
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('get_public_profile', { requested_account_id: accountId })
   if (error) throw error
-  return data as PublicProfile | null
+  return ((data as PublicProfile[] | null)?.[0] ?? null)
 }
 
 export async function getPublicProfileRoutes(accountId: string) {
   const { data, error } = await supabase
     .from('routes')
-    .select('id,name,created_at,distance_m')
+    .select('id,name,created_at,distance_m,copy_count')
     .eq('account_id', accountId)
     .eq('is_public', true)
     .order('created_at', { ascending: false })
