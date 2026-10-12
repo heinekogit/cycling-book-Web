@@ -49,3 +49,15 @@ Supabaseから一時的なLAN・トンネルのRedirect URLsを削除する。�
 適用直後の匿名閲覧テストで、古いルートポリシーが参照する `account_members` のSELECT権限不足を発見した。`202610120003_anon_route_policy_dependency.sql` をロールバック付きで検証してから一度適用し、匿名にSELECT権限だけ付与した。同テーブルにはSELECTポリシーがないため匿名・ログイン済みユーザーとも実データは0件。SQLのSHA-256は `a279a4e15efeef0b02bbba311ed56a458fbacf806a85ae99f723cce5b684fc99`。
 
 適用後に再登録した一般ユーザーの権限で `users`・`accounts`・`subscriptions` が各1件、他人の非公開ルート・実走が0件と確認した。匿名では公開ルート5件、非公開ルート0件、公開写真2件。プロフィール更新はロールバック付きで成功した。一般ユーザーのルート作成・公開RPCも適用前のロールバック付き検証で成功した。DB件数は適用後 `users` 8件、`routes` 51件、`runs` 43件、`route_spot_photos` 32件。ブラウザでの再読み込みによる表示確認は未実施。
+
+その後、GitHub Pagesの公開処理は成功し、ユーザーの実機再読み込みで「記録を読み込めませんでした」が消えたことを確認した。
+
+## 新規登録時の個人アカウント所属
+
+変更直前に `backups/20261012-before-membership-trigger/database.dump` へ全DBを `pg_dump -Fc` で保全し、`pg_restore -l` で読めることを確認した。SHA-256は `6cd5f405ea071f7d2bc57f8aa591756a3cdef15f3bc80442987d5c7c1ea3b259`。Git対象外。
+
+現行の `handle_new_user()` はAuthユーザー登録時に個人 `accounts`、`public.users`、無料 `subscriptions` を作るが、`account_memberships` を作っていなかった。所属のない既存個人ユーザー2件はいずれもAuthユーザーが存在し、無料プランが有効だった。
+
+`202610120004_signup_personal_membership.sql` をロールバック付きで検証後、一度だけ本番DBに適用した。新規登録と同じトランザクションで有効な `owner` 所属を作り、欠けていた2件だけ補完した。既存の所属のrole/statusは変更しない。移行SQLのSHA-256は `2b0509e02cb6396c3fee8617f042ab9ae1c1f16d776314386221447369cdb3d0`。
+
+試験用Authユーザーをロールバック付きトランザクションで挿入し、ユーザー・個人アカウント・owner所属・無料プランが各1件生成されることを確認した。適用後は個人アカウントの所属欠落0件、有効なowner所属8件。試験用Auth行は残っていない。一般ユーザーとして本人のowner所属1件と個人アカウント1件を閲覧できた。組織アカウントの作成・招待・ロール変更は今回の対象外。

@@ -27,7 +27,7 @@ Web版には新規登録、メール確認、パスワード再設定の画面�
 
 公開時は、確認メールと再設定メールを安定して送るため、SupabaseのカスタムSMTPも設定します。メールのリンク先がアプリへ戻ること、期限切れ時に再発行できることを実機で確認してください。GitHub Pagesの深いURLには、デプロイ処理が`404.html`を配置します。
 
-**現状のDBは開発者限定RLSです。** 新規登録とメール確認が成功しても、一般ユーザーのマイページ操作は許可されません。また、既存監査でRLS無効のテーブルも確認されています。一般ユーザーを受け入れる前に、`docs/supabase-two-environment-readiness.md`の権限修正を移行・検証してください。
+一般ユーザー向けRLSへの移行と、個人アカウントのowner所属生成は適用済みです。実施内容と検証結果は `docs/auth-smoke-test-20261012.md` を参照してください。Supabaseの開発・本番2環境化と復元試験は引き続き未完了です。
 
 ## GitHub Pages
 
@@ -46,13 +46,6 @@ GitHubの **Settings → Pages → Build and deployment → Source** では **Gi
 
 ## Supabase migrations
 
-開発中のデータを開発者本人だけに制限するSQLは、`supabase/migrations`で管理します。
-適用前にマイグレーション内の開発者メールアドレス用プレースホルダーを置き換えてください。
-
-適用順序:
-
-1. `202609060001_developer_only_access.sql`
-2. `202609130001_fix_route_photo_storage_access.sql`
-3. `202609130002_run_photo_structure.sql`
+変更SQLは `supabase/migrations` で管理します。現DBにはSupabase標準のマイグレーション履歴がなく、既存の初期スキーマ定義も不足しているため、このディレクトリを空のDBへ一括適用したり、現DBへ再適用したりしないでください。実DBからのベースライン整備が必要です。経緯は `docs/supabase-two-environment-readiness.md` を参照してください。
 
 新しい写真モデルと段階移行方針は`docs/photo-storage-design.md`にまとめています。
