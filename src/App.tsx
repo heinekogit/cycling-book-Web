@@ -8,6 +8,7 @@ import { SignUpPage } from './pages/SignUpPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
+import { DeleteAccountPage } from './pages/DeleteAccountPage'
 import { MyPage } from './pages/MyPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -29,6 +30,7 @@ export function App() {
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="auth/callback" element={<AuthCallbackPage />} />
+        <Route path="delete-account" element={<DeleteAccountPage />} />
         <Route path="routes/:routeId" element={<Suspense fallback={<main className="detail-page"><div className="detail-card">地図を準備しています…</div></main>}><RouteDetailPage /></Suspense>} />
         <Route path="mypage" element={<MyPage />} />
         <Route path="profile" element={<Suspense fallback={<main className="profile-page"><div className="state-panel">プロフィールを準備しています…</div></main>}><ProfilePage /></Suspense>} />

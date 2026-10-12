@@ -179,6 +179,8 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .form-card label { display: block; margin: 18px 0 7px; color: #3e4d43; font-size: 12px; font-weight: 800; }
 .form-card input { width: 100%; height: 52px; padding: 0 14px; border: 1px solid #ccd7cc; border-radius: 12px; color: #17221b; background: #fbfcfa; outline: none; }
 .form-card input:focus { border-color: #4f8964; box-shadow: 0 0 0 3px rgba(79,137,100,.12); }
+.form-card .delete-account-confirm { display: flex; align-items: center; gap: 10px; margin: 20px 0; font-size: 13px; }
+.form-card .delete-account-confirm input { flex: none; width: 18px; height: 18px; padding: 0; accent-color: #9b3f39; }
 .form-error { padding: 12px; border-radius: 10px; color: #a13d25; background: #fff0eb; font-size: 13px; }
 .form-success { padding: 12px; border-radius: 10px; color: #205f3b; background: #eaf7ed; font-size: 13px; }
 .form-hint { margin: 7px 0 0; color: #6b796f; font-size: 12px; }

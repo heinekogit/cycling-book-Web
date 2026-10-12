@@ -92,5 +92,6 @@ export function ProfilePage() {
       {message && <div className={`profile-message${status === 'error' ? ' error' : ''}`} role="status">{message}</div>}
       <div className="profile-submit"><button className="button button-primary" type="submit" disabled={status === 'saving'}>{status === 'saving' ? t('profileSettings.saving') : t('profileSettings.save')}</button></div>
     </form>
+    <section className="profile-card"><div className="profile-section-copy"><p className="eyebrow">ACCOUNT</p><h2>{t('deleteAccount.title')}</h2></div><div className="profile-fields"><p>{t('deleteAccount.emptyOnly')}</p><Link className="button button-quiet" to="/delete-account">{t('deleteAccount.open')}</Link></div></section>
   </main>
 }
