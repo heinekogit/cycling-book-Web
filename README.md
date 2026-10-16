@@ -29,6 +29,10 @@ Web版には新規登録、メール確認、パスワード再設定の画面�
 
 一般ユーザー向けRLSへの移行と、個人アカウントのowner所属生成は適用済みです。実施内容と検証結果は `docs/auth-smoke-test-20261012.md` を参照してください。Supabaseの開発・本番2環境化と復元試験は引き続き未完了です。
 
+## ローカルのSupabase接続先
+
+`npm run dev` はGit対象外の `.env.development.local` から `cycling-book-dev` に接続します。`npm run build` は `.env.production.local` から従来の本番扱いプロジェクトへ接続します。共通の `.env.local` は置かないでください。GitHub PagesのビルドはRepository secretsを使用し、従来の本番接続先を維持します。公開キー以外のDBパスワードやservice roleキーを `VITE_` 環境変数に設定しないでください。
+
 ## GitHub Pages
 
 GitHub Pagesは`main`ブランチへのpushで自動公開されます。
@@ -40,12 +44,12 @@ GitHub Actionsで使用するRepository secrets:
 - `VITE_MAPBOX_TOKEN`
 
 GitHubの **Settings → Pages → Build and deployment → Source** では **GitHub Actions** を選択します。
-このリポジトリの公開URLは `https://heinekogit.github.io/cycling-book-Web/` です。
+このリポジトリの公開URLは `https://heinekogit.github.io/cycling-book-Web/` です。開発用Supabaseに接続する別マシン用テストURLは `https://heinekogit.github.io/cycling-book-web-dev/` です。こちらの静的ビルドは別リポジトリ `heinekogit/cycling-book-web-dev` にあり、現時点ではMapboxトークンを含まない認証・Storage検証用です。
 
 最新の既存版は `/Users/dev_tomo/Desktop/cy2` にあります。既存HTMLを原本として参照し、画面単位でReactへ移行します。
 
 ## Supabase migrations
 
-変更SQLは `supabase/migrations` で管理します。現DBにはSupabase標準のマイグレーション履歴がなく、既存の初期スキーマ定義も不足しているため、このディレクトリを空のDBへ一括適用したり、現DBへ再適用したりしないでください。実DBからのベースライン整備が必要です。経緯は `docs/supabase-two-environment-readiness.md` を参照してください。
+変更SQLは `supabase/migrations/` で管理します。初期状態は `20261017000000_baseline.sql`、以後は14桁日時の前進マイグレーションです。旧16本は `supabase/archive/pre_baseline_20261017/` に履歴資料として退避しました。既存DBと開発用DBの実状態を照合し、両方のCLI履歴に適用済みとして登録したため、**ベースラインと旧16本を既存DBへ再実行しないでください**。次の変更手順と接続先の確認は `docs/db-migration-workflow-20261017.md` を参照してください。
 
 新しい写真モデルと段階移行方針は`docs/photo-storage-design.md`にまとめています。
