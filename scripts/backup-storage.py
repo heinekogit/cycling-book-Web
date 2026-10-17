@@ -14,7 +14,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
-BACKUP = ROOT / 'backups' / '20261011-200612-supabase'
+BACKUP_DIR = os.environ.get('CYCLING_BOOK_BACKUP_DIR')
+BACKUP = Path(BACKUP_DIR).resolve() if BACKUP_DIR else None
 BUCKET = 'route-photos'
 HOST = 'aws-1-ap-northeast-1.pooler.supabase.com'
 USER = 'postgres.cqiqhczxuiyakptdjowr'
@@ -68,6 +69,8 @@ def download(name, size, key):
 
 def main():
     os.umask(0o077)
+    if BACKUP is None or not BACKUP.is_relative_to((ROOT / 'backups').resolve()) or not (BACKUP / 'manifest.json').is_file():
+        raise SystemExit('CYCLING_BOOK_BACKUP_DIR で backups/ 内の manifest.json がある保存先を指定してください。')
     key_file = ROOT / '.backup-secrets' / 'storage-key'
     if not key_file.is_file():
         raise SystemExit('Storage keyがありません。先に save-storage-backup-key.py を実行してください。')
