@@ -31,7 +31,9 @@ Web版には新規登録、メール確認、パスワード再設定の画面�
 
 ## ローカルのSupabase接続先
 
-`npm run dev` はGit対象外の `.env.development.local` から `cycling-book-dev` に接続します。`npm run build` は `.env.production.local` から従来の本番扱いプロジェクトへ接続します。共通の `.env.local` は置かないでください。GitHub PagesのビルドはRepository secretsを使用し、従来の本番接続先を維持します。公開キー以外のDBパスワードやservice roleキーを `VITE_` 環境変数に設定しないでください。
+`npm run dev` と `npm run build -- --mode development` はGit対象外の `.env.development.local` から `cycling-book-dev` に接続します。`npm run build` は `.env.production.local` から従来の本番扱いプロジェクトへ接続します。共通の `.env.local` は置かないでください。GitHub PagesのビルドはRepository secretsを使用し、従来の本番接続先を維持します。`vite.config.ts` はモードとSupabase URLのプロジェクトIDを照合し、接続先の取り違えがあればビルドを止めます。公開キー以外のDBパスワードやservice roleキーを `VITE_` 環境変数に設定しないでください。
+
+2026-10-17に両モードのビルド、公開中の本番・開発用URL内の接続先、各環境のAuth API公開キーを確認済みです。開発用の公開URLは現時点でMapboxトークンを含まないため、地図機能の検証には別途トークンの利用先制限と開発版への設定が必要です。
 
 ## GitHub Pages
 
