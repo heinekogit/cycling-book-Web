@@ -10,4 +10,4 @@
 
 GitHub Actionsの実行 `39042002504` は成功した。配信中のHTMLとJSを確認し、開発用Supabaseの参照があり、本番用Supabaseの参照はなく、トークンのプレースホルダーも残っていないことを確認した。許可URLをRefererに指定したMapbox Directions（cycling）とGeocodingの応答はいずれもHTTP 200だった。
 
-ブラウザ画面でのルート描画・編集・保存は未検証。API経由の開発用DBへのルート保存と本番DBからの分離は `docs/web-environment-isolation-test-20261017.md` で確認済み。
+2026-10-17、ユーザーが開発用Web版にログインして、案内したルート描画、道路に沿うルート計算、住所検索、保存、開き直しての編集を試し、問題は見られなかったと報告した。これはユーザーによるブラウザ操作の結果であり、個々の操作ログや保存データの再照合は行っていない。API経由の開発用DBへのルート保存と本番DBからの分離は `docs/web-environment-isolation-test-20261017.md` で確認済み。
