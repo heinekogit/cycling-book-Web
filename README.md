@@ -33,7 +33,7 @@ Web版には新規登録、メール確認、パスワード再設定の画面�
 
 `npm run dev` と `npm run build -- --mode development` はGit対象外の `.env.development.local` から `cycling-book-dev` に接続します。`npm run build` は `.env.production.local` から従来の本番扱いプロジェクトへ接続します。共通の `.env.local` は置かないでください。GitHub PagesのビルドはRepository secretsを使用し、従来の本番接続先を維持します。`vite.config.ts` はモードとSupabase URLのプロジェクトIDを照合し、接続先の取り違えがあればビルドを止めます。公開キー以外のDBパスワードやservice roleキーを `VITE_` 環境変数に設定しないでください。
 
-2026-10-17に両モードのビルド、公開中の本番・開発用URL内の接続先、各環境のAuth API公開キーを確認済みです。開発用の公開URLは現時点でMapboxトークンを含まないため、地図機能の検証には別途トークンの利用先制限と開発版への設定が必要です。
+2026-10-17に両モードのビルド、公開中の本番・開発用URL内の接続先、各環境のAuth API公開キーを確認済みです。開発用の公開URLには利用先を制限したMapbox公開トークンを設定済みです。設定と検証結果は `docs/dev-mapbox-deployment-20261017.md` を参照してください。
 
 ## GitHub Pages
 
@@ -46,7 +46,7 @@ GitHub Actionsで使用するRepository secrets:
 - `VITE_MAPBOX_TOKEN`
 
 GitHubの **Settings → Pages → Build and deployment → Source** では **GitHub Actions** を選択します。
-このリポジトリの公開URLは `https://heinekogit.github.io/cycling-book-Web/` です。開発用Supabaseに接続する別マシン用テストURLは `https://heinekogit.github.io/cycling-book-web-dev/` です。こちらの静的ビルドは別リポジトリ `heinekogit/cycling-book-web-dev` にあり、現時点ではMapboxトークンを含まない認証・Storage検証用です。
+このリポジトリの公開URLは `https://heinekogit.github.io/cycling-book-Web/` です。開発用Supabaseに接続する別マシン用テストURLは `https://heinekogit.github.io/cycling-book-web-dev/` です。こちらの静的ビルドは別リポジトリ `heinekogit/cycling-book-web-dev` にあり、GitHub Actionsが公開時に制限付きMapbox公開トークンを設定します。
 
 最新の既存版は `/Users/dev_tomo/Desktop/cy2` にあります。既存HTMLを原本として参照し、画面単位でReactへ移行します。
 
