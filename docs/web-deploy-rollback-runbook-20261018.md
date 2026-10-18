@@ -7,13 +7,13 @@
 | 環境 | 公開リポジトリ | 現在の成功コミット | 成功Actions実行 | デプロイID |
 | --- | --- | --- | --- | --- |
 | 本番扱い | `heinekogit/cycling-book-Web` | `a60f495` | [38408809774](https://github.com/heinekogit/cycling-book-Web/actions/runs/38408809774) | `7040393696` |
-| 開発 | `heinekogit/cycling-book-web-dev` | `14e2628` | [39042002504](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39042002504) | `7141215880` |
+| 開発 | `heinekogit/cycling-book-web-dev` | `3c6c19e`（内容は`14e2628`と同一） | [39109296068](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39109296068) | `7151699553` |
 
 2026-10-18時点で両デプロイは`success`。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。
 
 ```bash
 npm run check:pages -- production a60f495
-npm run check:pages -- development 14e2628
+npm run check:pages -- development 3c6c19e
 ```
 
 この表は今後のデプロイごとに更新する。**切り戻し先は「直近のコミット」ではなく、動作確認済みの成功デプロイ**から選ぶ。
@@ -45,6 +45,11 @@ git -C /tmp/cycling-book-pages-rollback switch -c "$CB_ROLLBACK_BRANCH" "$CB_GOO
 git -C /tmp/cycling-book-pages-rollback push -u origin "$CB_ROLLBACK_BRANCH"
 ```
 
-## 検証範囲
+## 2026-10-18 開発版での切り戻し実地検証
 
-この手順の読み取り専用検査は両環境で成功し、誤った期待コミットの指定は拒否された。**実際の旧版再デプロイはまだ行っていない**。開発版で一度、旧成功実行の再実行→元の最新版の再実行を行い、GitHub Pagesの復旧時間と画面動作を確認することが運用リハーサルとして残る。したがって4-10は「手順作成済み」、実地検証は未完了と記録する。
+1. 正常版`14e2628`のPagesデプロイ`7141215880`と公開HTML/JSを確認した。
+2. 開発版`main`の`index.html`と`404.html`に画面動作を変えない目印を加えて`ed5d538`をpushした。[Actions実行39109163903](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39109163903)が成功し、デプロイ`7151680315`と公開HTMLの目印を確認した。
+3. 元の成功[Actions実行39042002504](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39042002504)を全ジョブ再実行した。2回目の試行は成功し、デプロイ`7151687576`が`14e2628`を指し、公開HTMLから目印が消えた。`check:pages`も成功した。**成功実行の再実行で古い配信物に戻せることを実測した。**
+4. 再実行だけではGitHub上の`main`は`ed5d538`のままになるため、一時コミットを`3c6c19e`でrevertしてpushした。[Actions実行39109296068](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39109296068)とデプロイ`7151699553`が成功した。`3c6c19e`と元の`14e2628`はGit tree IDが一致し、最終公開HTMLに目印はない。開発版のHTTPS/SPA/Supabase参照と本番扱いWebの`a60f495`維持を`check:pages`で確認した。
+
+この検証は**Web静的ファイルの配信と復旧**を確認したもの。ログイン・ルート編集・写真などの画面操作や、一時ブランチからの手動実行方式は未検証。後者は30日超過など再実行が使えない場合の代替手段として残る。4-10の手順整備と主要な切り戻し実地検証は完了。
