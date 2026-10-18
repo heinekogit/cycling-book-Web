@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "prepare:dev-pages": "node scripts/prepare-dev-pages.mjs",
+    "check:pages": "node scripts/check-pages-release.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
