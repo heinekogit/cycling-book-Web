@@ -7,7 +7,7 @@
 | 環境 | 公開リポジトリ | 現在の成功コミット | 成功Actions実行 | デプロイID |
 | --- | --- | --- | --- | --- |
 | 本番扱い | `heinekogit/cycling-book-Web` | `a60f495` | [38408809774](https://github.com/heinekogit/cycling-book-Web/actions/runs/38408809774) | `7040393696` |
-| 開発 | `heinekogit/cycling-book-web-dev` | `0e2e631`（空欄ホーム地点の修正版） | [39118938769](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39118938769) | `7153180290` |
+| 開発 | `heinekogit/cycling-book-web-dev` | `23ec2d7`（写真の公開表示修正版） | [39134691461](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39134691461) | `7155693635` |
 
 2026-10-18時点で両デプロイは`success`。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。
 
