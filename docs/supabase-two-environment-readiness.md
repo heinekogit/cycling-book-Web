@@ -95,7 +95,9 @@ SQL Editorに保存済みクエリは存在するが、保存クエリは適用�
 
 ### 優先度: 高 — Storageの読み取り・削除条件の共用
 
-実DBのStorage DELETEポリシーは `can_access_cycling_photo_object(name)` を使用し、この関数は公開写真も許可する。restrictive側のUSINGも同じ関数。DELETEにはWITH CHECKは適用されないため、ログインユーザーによる他者の公開写真削除を許す条件になっていないか、所有者限定の削除条件へ修正する必要がある。削除の実行検証はしていない。
+実DBのStorage DELETEポリシーは `can_access_cycling_photo_object(name)` を使用し、この関数は公開写真も許可する。DELETEにはWITH CHECKは適用されないため、ログインユーザーによる他者の公開写真削除を許す条件になっていないか、所有者限定の削除条件へ修正する必要がある。削除の実行検証はしていない。
+
+**2026-10-18検証・修正:** restrictive DELETEポリシーには当初から所有者限定条件があり、実効権限は安全だった。2ユーザー試験で他人の公開写真削除不可を両DBで確認した。そのうえでpermissive側も所有者限定に揃えた。詳細は `storage-photo-delete-audit-20261018.md`。
 
 ### 一般ユーザー運用への切り替え
 
