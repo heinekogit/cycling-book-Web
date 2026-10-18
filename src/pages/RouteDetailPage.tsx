@@ -131,6 +131,7 @@ export function RouteDetailPage() {
   const isShowingPublicVersion = Boolean(canEdit && route?.is_public && showPublicVersion)
   const visiblePoints = isShowingPublicVersion ? publicPoints : points
   const visibleMarkers = isShowingPublicVersion ? markers.filter((marker) => !marker.isPrivacyHidden) : markers
+  const visiblePhotos = isShowingPublicVersion ? photos.filter((photo) => !photo.is_privacy_hidden) : photos
   const visibleDistance = isShowingPublicVersion ? publicDistance : distance
   const privacySegments = useMemo(() => privacyCheck?.status === 'ready' && privacyCheck.filterEnabled && privacyCheck.home
     ? filterTrackOutsidePrivacyZone(points, privacyCheck.home, 500)
@@ -142,7 +143,8 @@ export function RouteDetailPage() {
     const routeTitle = route.name || t('explore.untitled')
     const distanceText = distance == null ? '' : `${formatNumber(distance / 1000, { maximumFractionDigits: 1 })} km`
     const description = route.description?.trim() || t('share.defaultDescription', { title: routeTitle, distance: distanceText })
-    const image = photos[0]?.image_url || photos[0]?.thumb_url
+    const shareablePhoto = route.is_public ? photos.find((photo) => !photo.is_privacy_hidden) : undefined
+    const image = shareablePhoto?.image_url || shareablePhoto?.thumb_url
     applyRouteMetadata({ title: routeTitle, description, image, isPublic: Boolean(route.is_public) })
     return resetRouteMetadata
   }, [distance, formatNumber, photos, route, t])
@@ -266,7 +268,7 @@ export function RouteDetailPage() {
         isPublic={Boolean(route.is_public)}
       />
 
-      <RouteMap points={visiblePoints} photos={isShowingPublicVersion ? photos.filter((photo) => !photo.is_privacy_hidden) : photos} markers={visibleMarkers} showDirectionArrows activeDistanceM={activeDistanceM} onActiveDistanceChange={setActiveDistanceM} />
+      <RouteMap points={visiblePoints} photos={visiblePhotos} markers={visibleMarkers} showDirectionArrows activeDistanceM={activeDistanceM} onActiveDistanceChange={setActiveDistanceM} />
 
       <ElevationPanel points={visiblePoints} record={isShowingPublicVersion ? undefined : route} onProfileResolved={canEdit && !isShowingPublicVersion ? saveElevation : undefined} activeDistanceM={activeDistanceM} onActiveDistanceChange={setActiveDistanceM} />
 
@@ -279,7 +281,7 @@ export function RouteDetailPage() {
 
       {route.source_run_id && <div className="source-note"><span>{t('route.fromRun')}</span><strong>{t('route.sourceRun', { id: route.source_run_id })}</strong></div>}
       {route.is_public && <div className="source-note"><span>{t('route.copyHistory')}</span><strong>{t('route.copyCount', { count: route.copy_count || 0 })}</strong></div>}
-      <RoutePhotos photos={photos} routeId={photoRouteId ?? route.id} />
+      <RoutePhotos photos={visiblePhotos} routeId={photoRouteId ?? route.id} publicView={isShowingPublicVersion} />
     </article>}
   </main>
 }

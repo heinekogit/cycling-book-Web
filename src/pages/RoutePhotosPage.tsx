@@ -24,10 +24,11 @@ export function RoutePhotosPage() {
     return () => { mounted = false }
   }, [routeId])
 
+  const visiblePhotos = useMemo(() => searchParams.get('view') === 'public' ? photos.filter((photo) => !photo.is_privacy_hidden) : photos, [photos, searchParams])
   const selected = useMemo(() => {
     const selectedId = searchParams.get('photo')
-    return photos.find((photo) => String(photo.id) === selectedId) || photos[0] || null
-  }, [photos, searchParams])
+    return visiblePhotos.find((photo) => String(photo.id) === selectedId) || visiblePhotos[0] || null
+  }, [visiblePhotos, searchParams])
   const formatTakenAt = (value: string | null) => value ? formatDate(value, { dateStyle: 'long', timeStyle: 'short' }) : t('photos.unknownDate')
   const displayStatus = routeId ? status : 'missing'
 
@@ -37,11 +38,11 @@ export function RoutePhotosPage() {
     {displayStatus === 'error' && <div className="state-panel state-error">{t('photos.loadError')}</div>}
     {displayStatus === 'missing' && <div className="state-panel">{t('photos.missing')}</div>}
     {displayStatus === 'ready' && route && <section className="photo-viewer-shell">
-      <header className="photo-viewer-heading"><div><p className="eyebrow">ROUTE PHOTOS</p><h1>{route.name || t('explore.untitled')}</h1></div><span>{t('photos.count', { count: photos.length })}</span></header>
+      <header className="photo-viewer-heading"><div><p className="eyebrow">ROUTE PHOTOS</p><h1>{route.name || t('explore.untitled')}</h1></div><span>{t('photos.count', { count: visiblePhotos.length })}</span></header>
       {selected ? <>
         <figure className="photo-viewer-main"><img src={selected.image_url} alt={t('photos.alt', { date: formatTakenAt(selected.taken_at) })} /><figcaption>{formatTakenAt(selected.taken_at)}</figcaption></figure>
         <div className="photo-viewer-thumbs" aria-label={t('photos.select')}>
-          {photos.map((photo) => <button type="button" className={String(photo.id) === String(selected.id) ? 'active' : ''} onClick={() => setSearchParams({ photo: String(photo.id) }, { replace: true })} key={photo.id}><img src={photo.thumb_url || photo.image_url} alt={formatTakenAt(photo.taken_at)} /></button>)}
+          {visiblePhotos.map((photo) => <button type="button" className={String(photo.id) === String(selected.id) ? 'active' : ''} onClick={() => setSearchParams((current) => { const next = new URLSearchParams(current); next.set('photo', String(photo.id)); return next }, { replace: true })} key={photo.id}><img src={photo.thumb_url || photo.image_url} alt={formatTakenAt(photo.taken_at)} /></button>)}
         </div>
       </> : <div className="panel-muted">{t('photos.empty')}</div>}
       <Link className="button button-quiet photo-route-link" to={`/routes/${route.id}`}>{t('photos.backToRoute')}</Link>
