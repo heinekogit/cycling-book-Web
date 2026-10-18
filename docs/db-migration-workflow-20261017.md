@@ -1,5 +1,7 @@
 # DBマイグレーションの基点と運用（2026-10-17）
 
+> **2026-10-18更新:** `20261018000100_remove_legacy_routes_runs_policies.sql` と `20261018000200_limit_internal_function_execute.sql` を開発用・本番扱いDBの両方へ一度ずつ適用し、各履歴を登録した。以下の「3件」は2026-10-17時点の基点を示す記録。現在の履歴は計5件であり、どちらのSQLも再実行しない。適用前後の試験とバックアップは `docs/legacy-policy-cleanup-20261018.md`、`docs/function-execute-audit-20261018.md` を参照。
+
 ## 対象
 
 - 既存の本番扱いプロジェクト: `cqiqhczxuiyakptdjowr`（PostgreSQL 17.6）。利用者データを保持。
