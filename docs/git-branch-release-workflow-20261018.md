@@ -30,4 +30,4 @@ GitHub側では、`main`へのPR必須、`Verify Web source / verify`の成功�
 
 **2026-10-18時点:** ローカルブランチ分離と検証ワークフローを作成し、`develop`をGitHubへpushした。`Verify Web source`の実行[39108142662](https://github.com/heinekogit/cycling-book-Web/actions/runs/39108142662)は`success`（ジョブ名`verify`）。本番扱いPagesと開発版Pagesへのデプロイは行っていない。
 
-GitHubの`main`保護設定は未実施。設定候補は「PR必須、`verify`成功必須、管理者にも適用、force pushと削除は禁止、承認者数0」。自動承認審査が永続的なアクセス変更として拒否したため、明示承認を得てから設定する。したがって4-2の運用設計と`develop`の公開は完了、GitHub側の強制は未完了。
+ユーザーの明示承認後、GitHubの`main`保護を設定し、APIの応答で「PR必須、`verify`成功必須、管理者にも適用、force pushと削除は禁止、承認者数0」を確認した。`main`のコミットは変更していない。**4-2は完了**。本番への初回PR・マージは別の公開作業として、上記の差分レビューと開発版での確認を経て行う。
