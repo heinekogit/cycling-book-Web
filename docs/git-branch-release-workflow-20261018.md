@@ -28,4 +28,6 @@
 
 GitHub側では、`main`へのPR必須、`Verify Web source / verify`の成功必須、force push・ブランチ削除の禁止を設定する。単独開発で承認者がいない間は「他者の承認必須」は設定しない。開発Pagesリポジトリ側も`main`が即公開なので、静的ビルドの差分確認と`check:pages`を必須の作業手順とする。
 
-**2026-10-18時点:** ローカルブランチ分離と検証ワークフローは作成済み。`develop`/ワークフローのGitHubへのpushとGitHubのブランチ保護設定は未実施。本番扱いPagesと開発版Pagesへのデプロイは行っていない。したがって4-2の運用設計はできたが、GitHub上での強制はまだ未完了。
+**2026-10-18時点:** ローカルブランチ分離と検証ワークフローを作成し、`develop`をGitHubへpushした。`Verify Web source`の実行[39108142662](https://github.com/heinekogit/cycling-book-Web/actions/runs/39108142662)は`success`（ジョブ名`verify`）。本番扱いPagesと開発版Pagesへのデプロイは行っていない。
+
+GitHubの`main`保護設定は未実施。設定候補は「PR必須、`verify`成功必須、管理者にも適用、force pushと削除は禁止、承認者数0」。自動承認審査が永続的なアクセス変更として拒否したため、明示承認を得てから設定する。したがって4-2の運用設計と`develop`の公開は完了、GitHub側の強制は未完了。
