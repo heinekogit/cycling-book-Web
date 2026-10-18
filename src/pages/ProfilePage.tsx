@@ -32,6 +32,7 @@ export function ProfilePage() {
   }, [isAuthLoading, session?.user.id, t])
 
   const location = useMemo<HomeLocation | null>(() => {
+    if (latitude.trim() === '' || longitude.trim() === '') return null
     const lat = Number(latitude); const lng = Number(longitude)
     return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 ? { lat, lng } : null
   }, [latitude, longitude])
