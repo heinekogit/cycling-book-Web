@@ -416,8 +416,9 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 
 @media (max-width: 470px) {
   .site-header { display: block; }
-  .header-actions { justify-content: flex-start; margin-top: 16px; }
-  .header-actions .button { flex: 1; }
+  .header-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 16px; }
+  .header-actions .language-switcher, .header-actions .account-switcher { grid-column: 1 / -1; width: fit-content; }
+  .header-actions .button { align-self: stretch; min-width: 0; padding-inline: 6px; font-size: 12px; text-align: center; }
   .route-card-number { display: none; }
   .route-card { grid-template-columns: minmax(0, 1fr) auto; }
   .route-detail-heading { flex-direction: column; }
