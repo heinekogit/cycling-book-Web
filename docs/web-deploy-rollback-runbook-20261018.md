@@ -7,13 +7,13 @@
 | 環境 | 公開リポジトリ | 現在の成功コミット | 成功Actions実行 | デプロイID |
 | --- | --- | --- | --- | --- |
 | 本番扱い | `heinekogit/cycling-book-Web` | `a60f495` | [38408809774](https://github.com/heinekogit/cycling-book-Web/actions/runs/38408809774) | `7040393696` |
-| 開発 | `heinekogit/cycling-book-web-dev` | `0ec082a`（狭幅ナビの折り返し修正） | [39263826110](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39263826110) | `7175620940` |
+| 開発 | `heinekogit/cycling-book-web-dev` | `b0ff648`（見出し・ルート一覧の密度調整） | [39269611630](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/39269611630) | `7176546122` |
 
 2026-10-19時点で両デプロイは`success`。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。
 
 ```bash
 npm run check:pages -- production a60f495
-npm run check:pages -- development 0ec082a
+npm run check:pages -- development b0ff648
 ```
 
 この表は今後のデプロイごとに更新する。**切り戻し先は「直近のコミット」ではなく、動作確認済みの成功デプロイ**から選ぶ。
