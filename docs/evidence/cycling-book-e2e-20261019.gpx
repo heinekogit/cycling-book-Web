@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Cycling Book E2E" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk><name>E2E合成GPX 2026-10-19</name><trkseg>
+    <trkpt lat="35.68000" lon="139.76000"><ele>12</ele><time>2026-10-19T00:00:00Z</time></trkpt>
+    <trkpt lat="35.68100" lon="139.76100"><ele>15</ele><time>2026-10-19T00:01:00Z</time></trkpt>
+    <trkpt lat="35.68200" lon="139.76200"><ele>18</ele><time>2026-10-19T00:02:00Z</time></trkpt>
+  </trkseg></trk>
+</gpx>
