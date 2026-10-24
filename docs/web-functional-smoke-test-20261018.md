@@ -136,10 +136,10 @@
 ## 非公開ルート見出しの表示修正（2026-10-24）
 
 - 2026-10-20のSafari検証で見つかった、非公開ルート詳細にも小見出し`PUBLIC ROUTE`が出る不整合を修正した。`RouteDetailPage.tsx`で公開状態に応じて`PUBLIC ROUTE`または`PRIVATE ROUTE`を表示する。
-- ソースコミット`30d5a17`。ローカルの`npm run lint`と`npm run build`は成功。開発Pagesコミット`193c6a3`、[Actions実行40100435590](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/40100435590)、デプロイ`7299571307`は成功し、`check:pages`でHTTPS・SPA fallback・開発用Supabase参照を確認。配信されたルート詳細JSに両見出しが含まれることも確認した。認証済みブラウザ画面での再表示確認は、画面操作接続の不具合により未実施。本番環境は変更していない。
+- ソースコミット`30d5a17`。ローカルの`npm run lint`と`npm run build`は成功。開発Pagesコミット`193c6a3`、[Actions実行40100435590](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/40100435590)、デプロイ`7299571307`は成功し、`check:pages`でHTTPS・SPA fallback・開発用Supabase参照を確認。配信されたルート詳細JSに両見出しが含まれることも確認した。ユーザーがログイン済みSafariで開発版の非公開ルートID `4`を再読み込みし、小見出しが`PRIVATE ROUTE`に変わったと報告した。Codex側の画面操作接続は起動できず、画面を直接確認していない。本番環境は変更していない。
 
 ## 未完了の確認
 
-- iPhone実機での開発版WebとiOS版の読み取り共有、およびiOS版のGPX実走軌跡表示の再実機確認は完了。マーカー吹き出しのコメント表示・閉じる操作はユーザー報告で確認。写真表示・拡大、iPhone Safariでの編集・保存、iOS版からWebへの書き込み確認が残る。非公開ルート見出しの修正は認証済みブラウザ画面での再確認待ち。
+- iPhone実機での開発版WebとiOS版の読み取り共有、およびiOS版のGPX実走軌跡表示の再実機確認は完了。マーカー吹き出しのコメント表示・閉じる操作と、開発版Safariの非公開ルート見出し修正はユーザー報告で確認。写真表示・拡大、iPhone Safariでの編集・保存、iOS版からWebへの書き込み確認が残る。
 
 したがって**2-1は作業中**。確認済みの範囲をもって「総合動作テスト完了」とはしない。
