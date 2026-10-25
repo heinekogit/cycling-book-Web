@@ -50,3 +50,7 @@ iPhone実機の新しい開発ビルドでは、通常サイズの撮影画像�
 開発DBも変更前バックアップ`dev-before-history-reconcile.dump`（SHA-256: `4bef8693f49657478de8983e4ddd07d16518598ee5243cabca6c3e7339e83070`）を取得。正本SQLのROLLBACK試験後、既存の同等実装を正本SQLで原子的に再適用し、欠けていた履歴`20261025000100`を登録した。開発DBの履歴1件、トリガー・バケット設定、適用後の20/21件境界試験を確認した。これらの移行SQLを再実行しない。
 
 本番Webの旧版は写真入力が10MB表示で、21件目の公開エラーを説明しない。5-4に関係するWeb変更と移行SQLだけを`release/5-4-free-limits`（`6f5a5a5`）へ切り出し、検証ワークフロー追加（`77a9037`）を含む[PR #1](https://github.com/heinekogit/cycling-book-Web/pull/1)をレビュー可能にした。ESLint・TypeScript・本番モードのViteビルドとPRのCIは通過し、生成JSは本番Supabaseのみを参照した。**PRは未マージで本番Pagesは旧版のまま**。残るのはPRのレビュー・本番Web反映、iOS実機でのStorage同期・20MB境界試験。今回iPhoneミラーリングの接続が失敗し、追加の実機操作はできなかった。
+
+## 2026-10-25 本番Web反映
+
+ユーザー承認後、PR #1を`main`へマージした（`e530779`）。[Pages公開ジョブ #11](https://github.com/heinekogit/cycling-book-Web/actions/runs/40173527767)は成功し、デプロイIDは`7310168764`。`npm run check:pages -- production e530779`で配信コミット・HTTPS・SPA・本番Supabase参照の一致を確認した。本番トップ画面で匿名の公開ルート5件が読み込まれた。ログイン後の写真選択・ルート公開の画面操作、iOS実機でのStorage同期・20MB境界試験は未了。5-4の公開準備全体は引き続き「作業中」。

@@ -6,14 +6,14 @@
 
 | 環境 | 公開リポジトリ | 現在の成功コミット | 成功Actions実行 | デプロイID |
 | --- | --- | --- | --- | --- |
-| 本番扱い | `heinekogit/cycling-book-Web` | `a60f495` | [38408809774](https://github.com/heinekogit/cycling-book-Web/actions/runs/38408809774) | `7040393696` |
-| 開発 | `heinekogit/cycling-book-web-dev` | `193c6a3`（非公開ルート見出しの表示修正） | [40100435590](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/40100435590) | `7299571307` |
+| 本番扱い | `heinekogit/cycling-book-Web` | `e530779`（5-4の無料上限表示） | [40173527767](https://github.com/heinekogit/cycling-book-Web/actions/runs/40173527767) | `7310168764` |
+| 開発 | `heinekogit/cycling-book-web-dev` | `19b6659`（5-4の無料上限表示） | [40160742583](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/40160742583) | `7308393565` |
 
-2026-10-24時点で両デプロイは`success`。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。
+2026-10-25時点で両デプロイは`success`。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。本番トップの公開ルート5件表示も確認した。ログイン後の本番Web操作は未確認。
 
 ```bash
-npm run check:pages -- production a60f495
-npm run check:pages -- development 193c6a3
+npm run check:pages -- production e530779
+npm run check:pages -- development 19b6659
 ```
 
 この表は今後のデプロイごとに更新する。**切り戻し先は「直近のコミット」ではなく、動作確認済みの成功デプロイ**から選ぶ。
@@ -38,7 +38,7 @@ npm run check:pages -- development 193c6a3
 
 ```bash
 CB_REPO='cycling-book-Web'
-CB_GOOD_SHA='a60f495'
+CB_GOOD_SHA='e530779'
 CB_ROLLBACK_BRANCH='rollback/20261018'
 git clone "https://github.com/heinekogit/${CB_REPO}.git" /tmp/cycling-book-pages-rollback
 git -C /tmp/cycling-book-pages-rollback switch -c "$CB_ROLLBACK_BRANCH" "$CB_GOOD_SHA"
