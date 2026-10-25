@@ -212,7 +212,9 @@ export function RouteDetailPage() {
     } catch (error) {
       console.error('公開設定を更新できませんでした', error)
       const detail = errorMessage(error)
-      setVisibilityMessage(detail ? `${t('route.updateError')}（${detail}）` : t('route.updateError'))
+      setVisibilityMessage(detail.includes('free_public_route_limit_reached')
+        ? t('route.publicLimitReached')
+        : detail ? `${t('route.updateError')}（${detail}）` : t('route.updateError'))
     } finally {
       setIsUpdatingVisibility(false)
     }
