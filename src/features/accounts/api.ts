@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { initialReleaseAccounts } from './initial-release'
 import type { AccountRole, AvailableAccount, PlanCode, PlanEntitlement, PlanStatus } from './types'
 
 type LegacyUser = { account_id: string | number | null; display_name: string | null }
@@ -72,8 +73,7 @@ export async function getAvailableAccounts(userId: string) {
     }
   })
 
-  if (legacyAccount && !available.some((account) => account.id === legacyAccount.id)) available.unshift(legacyAccount)
-  return available
+  return initialReleaseAccounts(available, legacyAccount)
 }
 
 export async function getPlanEntitlements(planCode: PlanCode | null) {
