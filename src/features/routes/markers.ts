@@ -28,7 +28,7 @@ export async function getRouteMarkers(routeId: string | number, ownerView = fals
   if (error) throw error
   const ids = (markerRows ?? []).map((row) => row.id)
   const { data: photoRows, error: photoError } = ids.length
-    ? await supabase.from('route_spot_photos').select('id,marker_id,image_url,thumb_url,public_image_url,is_publicly_selected,sort_order').in('marker_id', ids).order('sort_order')
+    ? await supabase.from('route_spot_photos').select('id,marker_id,image_url,thumb_url,public_image_url,is_publicly_selected,sort_order').in('marker_id', ids).is('deleted_at', null).order('sort_order')
     : { data: [], error: null }
   if (photoError) throw photoError
   const photos = await Promise.all((photoRows ?? []).map(async (row) => {

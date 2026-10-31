@@ -65,7 +65,7 @@ export async function getPublicRoutes(limit = 10) {
   const routes = (data ?? []) as ExploreRoute[]
   const photoCounts: Record<string, number> = {}
   if (routes.length) {
-    const { data: photos, error: photoError } = await supabase.from('route_spot_photos').select('route_id').in('route_id', routes.map((route) => route.id)).eq('is_publicly_selected', true).eq('is_privacy_hidden', false)
+    const { data: photos, error: photoError } = await supabase.from('route_spot_photos').select('route_id').in('route_id', routes.map((route) => route.id)).eq('is_publicly_selected', true).eq('is_privacy_hidden', false).is('deleted_at', null)
     if (!photoError) {
       for (const photo of photos ?? []) {
         const routeId = String(photo.route_id)
@@ -99,6 +99,7 @@ export async function getRoutePhotos(routeId: number | string, ownerView = false
     .from('route_spot_photos')
     .select('id,image_url,thumb_url,public_image_url,is_publicly_selected,taken_at,lat,lng,run_photo_id,sort_order,is_privacy_hidden,marker_id')
     .eq('route_id', routeId)
+    .is('deleted_at', null)
     .order('sort_order', { ascending: true })
     .order('taken_at', { ascending: true })
   if (error) throw error
