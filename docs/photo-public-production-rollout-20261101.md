@@ -21,4 +21,10 @@
 - [Pages Actions 41241703322](https://github.com/heinekogit/cycling-book-Web/actions/runs/41241703322)成功。Pagesデプロイ`7464341666`が`6224395`を指す。`npm run check:pages -- production 6224395`でHTTPS、SPAの`404.html`、本番Supabase参照を確認。
 - 未ログインの[ルート33写真ページ](https://heinekogit.github.io/cycling-book-Web/routes/33/photos)で「0枚」を確認。所有者のWeb画面で有効写真1枚と公開選択ボタンが見えるかは確認待ち。
 
+## 旧形式の元画像への所有者アクセス補正（2026-11-01）
+
+所有者の画面には有効な写真1枚が表示されたが、画像が読み込めなかった。ルート33のStorageオブジェクト名は`1768010776083.jpg`のような旧形式の直下ファイル名で、既存の`can_access_route_photo_object`は`routes/33/...`形式だけを所有者へ許可していた。写真行とStorageオブジェクトは存在したが、所有者のStorage SELECTでは0件だった。
+
+`20261101000100_legacy_route_photo_owner_access.sql`では、旧形式のファイル名を写真行の元画像・サムネイル参照と厳密一致させ、同じルートアカウントの所有者だけにアクセスを追加した。新形式の判定は維持する。本番で単一トランザクションの事前試験後に`ROLLBACK`し、所有者1件、別ユーザー0件、匿名0件を確認。開発DB、本番DBの順に各一度だけ適用し、履歴は両方とも1行。適用後の読み取り専用再試験も所有者1件、別ユーザー0件、匿名0件だった。所有者ブラウザで再読み込み後に11:06の写真が表示されたことを確認した。
+
 以前発行された署名URLや第三者の保存済み画像・キャッシュは回収できない。旧Webへの切り戻しは新DBの列と公開用コピーの扱いが合わないため、障害時はまず前進修正を検討する。iOSの公開候補は[Draft PR #1](https://github.com/heinekogit/cycling-book-app/pull/1)に残り、TestFlight実機確認前に一般公開しない。
