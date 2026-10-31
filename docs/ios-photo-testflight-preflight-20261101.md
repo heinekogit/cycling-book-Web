@@ -10,9 +10,10 @@
 
 TestFlightアップロード前の未完了:
 
-1. App Store Connectへログインし、`com.dotblotworks.cyclingbook`のアプリ登録と配布権限を確認する。ChromeのApp Store Connectはログイン画面の読み込み中から進まず、Safariでの確認を依頼中。
-2. このMacのKeychainで`security find-identity -v -p codesigning`は有効な署名IDを0件と報告。Apple Developerの配布署名とプロビジョニングを用意する。
-3. 本番接続先を固定した署名済みiOSアーカイブを作り、App Store ConnectへアップロードしてTestFlight処理完了を確認する。ローカルの`.env.local`は開発用なので、そのまま配布ビルドに使用しない。
-4. iPhoneでTestFlight版にログインし、ルート33の所有者の未選択写真は見えること、他ユーザーには見えないこと、公開選択された開発用写真だけが公開用コピーで見えることを確認する。ルート33の本番写真は非公開のまま維持する。
+1. 正しいApp Store Connectアカウント「Tomoki Kawakubo」には、2026-11-01時点でアプリ登録がなく、新規アプリ画面のBundle ID候補も空。旧「WORDSCAPE, INC.」アカウントには過去のCyclingBook登録があるが、今回の配布先ではない。正しいチームのBundle ID・新規アプリ登録が必要。現行iOSプロジェクトの`appleTeamId=Z638ZXC26R`と`com.dotblotworks.cyclingbook`は旧設定として再確認する。
+2. 正しいアカウントのApp Store Connectには、更新されたApple Developer Program使用許諾契約へのAccount Holderの同意が必要との通知がある。`developer.apple.com/account`は確認時にメンテナンス画面へ遷移した。Apple側が復旧後、本人が契約内容を確認・同意する必要がある。
+3. このMacのKeychainで`security find-identity -v -p codesigning`は有効な署名IDを0件と報告。正しいチームの配布署名とプロビジョニングを用意する。
+4. 本番接続先を固定した署名済みiOSアーカイブを作り、App Store ConnectへアップロードしてTestFlight処理完了を確認する。ローカルの`.env.local`は開発用なので、そのまま配布ビルドに使用しない。
+5. iPhoneでTestFlight版にログインし、ルート33の所有者の未選択写真は見えること、他ユーザーには見えないこと、公開選択された開発用写真だけが公開用コピーで見えることを確認する。ルート33の本番写真は非公開のまま維持する。
 
 Draft PR #1はTestFlight確認前に`main`へマージしない。
