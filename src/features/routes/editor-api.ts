@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase'
 import { totalDistanceMeters, type TrackPoint } from './geometry'
-import { signedPhotoUrl, type RoutePhoto } from './api'
+import { getRoutePhotos, signedPhotoUrl, type RoutePhoto } from './api'
+import { setPhotoPublicChoice } from './public-photo'
 
 export type RoutePhotoCandidate = {
   key: string
@@ -57,6 +58,11 @@ export async function createRoute(payload: RouteEditorPayload) {
 }
 
 export async function updateRoute(routeId: string, payload: RouteEditorPayload) {
+  // Editing makes the route private. Remove published bytes first so signed
+  // links issued before editing cannot keep serving old copies.
+  for (const photo of (await getRoutePhotos(routeId, true)).filter((item) => item.is_publicly_selected)) {
+    await setPhotoPublicChoice(routeId, photo, false)
+  }
   const { data, error } = await supabase.from('routes').update({ ...toDatabasePayload({ ...payload, isPublic: false }), privacy_filter_enabled: false, privacy_zone_radius_m: null }).eq('id', routeId).eq('account_id', payload.accountId).select('id').maybeSingle()
   if (error) throw error
   if (!data?.id) throw new Error('更新対象のルートを確認できません')

@@ -11,6 +11,7 @@ import { RouteMap } from '../features/maps/RouteMap'
 import { RoutePhotos } from '../features/photos/RoutePhotos'
 import { getProfile, getPublicProfile, type PublicProfile } from '../features/profile/api'
 import { getPrivateRouteGeometry, getRoute, getRoutePhotos, getSourceRunGeometry, updateRouteVisibility, type RouteDetail, type RoutePhoto } from '../features/routes/api'
+import { setPhotoPublicChoice } from '../features/routes/public-photo'
 import { getRouteMarkers, type RouteMarker } from '../features/routes/markers'
 import { distanceMeters, extractRoutePoints, filterTrackOutsidePrivacyZone, minimumDistanceToTrackMeters, segmentsToGeoJson, totalDistanceMeters, type TrackPoint } from '../features/routes/geometry'
 import { getLegacyRouteForRun } from '../features/runs/api'
@@ -34,6 +35,7 @@ export function RouteDetailPage() {
   const [ownerAccountId, setOwnerAccountId] = useState<string | number | null>(null)
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false)
   const [visibilityMessage, setVisibilityMessage] = useState('')
+  const [updatingPhotoId, setUpdatingPhotoId] = useState<string | null>(null)
   const [privacyCheck, setPrivacyCheck] = useState<{ status: 'ready' | 'missing'; filterEnabled: boolean; home?: TrackPoint; minimumDistance?: number } | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error' | 'missing'>('loading')
   const [activeDistanceM, setActiveDistanceM] = useState<number | null>(null)
@@ -85,9 +87,9 @@ export function RouteDetailPage() {
       }
       try {
         const [photosResult, profileResult, markersResult] = await Promise.allSettled([
-          getRoutePhotos(data.id),
+          getRoutePhotos(data.id, isOwner),
           data.account_id == null ? Promise.resolve(null) : getPublicProfile(String(data.account_id)),
-          getRouteMarkers(data.id),
+          getRouteMarkers(data.id, isOwner),
         ])
         if (photosResult.status === 'rejected') console.warn('ルート写真を取得できませんでした', photosResult.reason)
         if (markersResult.status === 'rejected') console.warn('マーカーを取得できませんでした', markersResult.reason)
@@ -101,7 +103,7 @@ export function RouteDetailPage() {
           const source = sourceRun as ({ started_at?: string | null; created_at?: string | null } | null)
           const legacyRoute = await getLegacyRouteForRun(data.account_id, source?.started_at || source?.created_at || data.created_at)
           if (legacyRoute && String(legacyRoute.id) !== String(data.id)) {
-            routePhotos = await getRoutePhotos(legacyRoute.id)
+            routePhotos = await getRoutePhotos(legacyRoute.id, isOwner)
             nextPhotoRouteId = legacyRoute.id
           }
         }
@@ -130,8 +132,8 @@ export function RouteDetailPage() {
   const displayStatus = routeId ? status : 'missing'
   const isShowingPublicVersion = Boolean(canEdit && route?.is_public && showPublicVersion)
   const visiblePoints = isShowingPublicVersion ? publicPoints : points
-  const visibleMarkers = isShowingPublicVersion ? markers.filter((marker) => !marker.isPrivacyHidden) : markers
-  const visiblePhotos = isShowingPublicVersion ? photos.filter((photo) => !photo.is_privacy_hidden) : photos
+  const visibleMarkers = isShowingPublicVersion ? markers.filter((marker) => !marker.isPrivacyHidden).map((marker) => ({ ...marker, photos: marker.photos.filter((photo) => photo.isPubliclySelected).map((photo) => ({ ...photo, imageUrl: photo.publicImageUrl || '', thumbUrl: photo.publicImageUrl || '' })) })) : markers
+  const visiblePhotos = isShowingPublicVersion ? photos.filter((photo) => photo.is_publicly_selected && !photo.is_privacy_hidden).map((photo) => ({ ...photo, image_url: photo.public_image_signed_url || '', thumb_url: photo.public_image_signed_url })) : photos
   const visibleDistance = isShowingPublicVersion ? publicDistance : distance
   const privacySegments = useMemo(() => privacyCheck?.status === 'ready' && privacyCheck.filterEnabled && privacyCheck.home
     ? filterTrackOutsidePrivacyZone(points, privacyCheck.home, 500)
@@ -143,11 +145,32 @@ export function RouteDetailPage() {
     const routeTitle = route.name || t('explore.untitled')
     const distanceText = distance == null ? '' : `${formatNumber(distance / 1000, { maximumFractionDigits: 1 })} km`
     const description = route.description?.trim() || t('share.defaultDescription', { title: routeTitle, distance: distanceText })
-    const shareablePhoto = route.is_public ? photos.find((photo) => !photo.is_privacy_hidden) : undefined
-    const image = shareablePhoto?.image_url || shareablePhoto?.thumb_url
+    const shareablePhoto = route.is_public ? photos.find((photo) => photo.is_publicly_selected && !photo.is_privacy_hidden) : undefined
+    const image = shareablePhoto?.public_image_signed_url
     applyRouteMetadata({ title: routeTitle, description, image, isPublic: Boolean(route.is_public) })
     return resetRouteMetadata
   }, [distance, formatNumber, photos, route, t])
+
+  const changePhotoChoice = async (photo: RoutePhoto) => {
+    if (!route || !canEdit) return
+    setUpdatingPhotoId(String(photo.id))
+    setVisibilityMessage('')
+    try {
+      const choice = await setPhotoPublicChoice(route.id, photo, !photo.is_publicly_selected)
+      setPhotos((current) => current.map((item) => String(item.id) === String(photo.id) ? {
+        ...item,
+        is_publicly_selected: choice.is_publicly_selected,
+        public_image_path: choice.public_image_url,
+        public_image_signed_url: choice.public_image_signed_url,
+      } : item))
+      setVisibilityMessage(choice.is_publicly_selected ? 'この写真を公開対象にしました。ルートが公開中なら他の人にも表示されます。' : 'この写真を非公開にしました。')
+    } catch (error) {
+      console.error('写真の公開設定を更新できませんでした', error)
+      setVisibilityMessage(`写真の公開設定を更新できませんでした。${errorMessage(error)}`)
+    } finally {
+      setUpdatingPhotoId(null)
+    }
+  }
 
   const changeVisibility = async () => {
     if (!route || ownerAccountId == null) return
@@ -179,6 +202,12 @@ export function RouteDetailPage() {
     setIsUpdatingVisibility(true)
     setVisibilityMessage(nextVisibility ? t('route.publishing') : t('route.unpublishing'))
     try {
+      if (!nextVisibility) {
+        for (const photo of photos.filter((item) => item.is_publicly_selected)) {
+          await setPhotoPublicChoice(route.id, photo, false)
+        }
+        setPhotos((current) => current.map((photo) => ({ ...photo, is_publicly_selected: false, public_image_path: null, public_image_signed_url: null })))
+      }
       const hiddenPhotoIds = nextVisibility && privacyCheck?.status === 'ready' && privacyCheck.filterEnabled && privacyCheck.home
         ? photos.filter((photo) => photo.lat != null && photo.lng != null && distanceMeters(privacyCheck.home as TrackPoint, { lat: Number(photo.lat), lng: Number(photo.lng) }) <= 500).map((photo) => String(photo.id))
         : []
@@ -269,6 +298,15 @@ export function RouteDetailPage() {
         description={route.description?.trim() || t('share.defaultDescription', { title: route.name || t('explore.untitled'), distance: distance == null ? '' : `${formatNumber(distance / 1000, { maximumFractionDigits: 1 })} km` })}
         isPublic={Boolean(route.is_public)}
       />
+
+      {canEdit && photos.length > 0 && String(photoRouteId) === String(route.id) && <section className="detail-card photo-public-settings" aria-label="写真ごとの公開設定">
+        <h2>写真ごとの公開設定</h2>
+        <p>写真は初期状態では非公開です。公開を選んだ写真だけが、ルート公開中に表示されます。ホーム地点から500m以内の除外をオンにした場合は、公開を選んだ写真も範囲内では表示されません。</p>
+        <div className="photo-public-settings-grid">{photos.map((photo) => <div className="photo-public-settings-card" key={photo.id}>
+          <img src={photo.thumb_url || photo.image_url} alt="公開設定する写真" />
+          <button type="button" aria-pressed={photo.is_publicly_selected} disabled={updatingPhotoId !== null} onClick={() => void changePhotoChoice(photo)}>{updatingPhotoId === String(photo.id) ? '処理中…' : photo.is_publicly_selected ? '公開中・非公開にする' : '非公開・公開する'}</button>
+        </div>)}</div>
+      </section>}
 
       <RouteMap points={visiblePoints} photos={visiblePhotos} markers={visibleMarkers} showDirectionArrows activeDistanceM={activeDistanceM} onActiveDistanceChange={setActiveDistanceM} />
 

@@ -62,7 +62,7 @@ export function RunDetailPage() {
           const photoRoute = await getRouteForRun(data.id, currentAccountId, data.started_at || data.created_at)
           route = await getConvertedRouteForRun(data.id, currentAccountId)
           nextPhotoRouteId = runPhotos.length > 0 ? null : photoRoute?.id ?? null
-          const legacyPhotos = photoRoute ? await getRoutePhotos(photoRoute.id) : []
+          const legacyPhotos = photoRoute ? await getRoutePhotos(photoRoute.id, true) : []
           const directPaths = new Set(runPhotos.flatMap((photo) => [photo.image_path, photo.thumb_path].filter(Boolean)))
           routePhotos = [...runPhotos, ...legacyPhotos.filter((photo) => !photo.run_photo_id && !directPaths.has(photo.image_path) && !(photo.thumb_path && directPaths.has(photo.thumb_path)))]
         } catch (error) { console.warn('関連ルートまたは写真を取得できませんでした', error) }

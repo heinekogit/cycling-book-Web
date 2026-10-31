@@ -29,6 +29,9 @@ export type RoutePhoto = {
   run_photo_id: string | null
   sort_order: number
   is_privacy_hidden: boolean
+  is_publicly_selected: boolean
+  public_image_path: string | null
+  public_image_signed_url: string | null
   marker_id: string | null
 }
 
@@ -62,7 +65,7 @@ export async function getPublicRoutes(limit = 10) {
   const routes = (data ?? []) as ExploreRoute[]
   const photoCounts: Record<string, number> = {}
   if (routes.length) {
-    const { data: photos, error: photoError } = await supabase.from('route_spot_photos').select('route_id').in('route_id', routes.map((route) => route.id))
+    const { data: photos, error: photoError } = await supabase.from('route_spot_photos').select('route_id').in('route_id', routes.map((route) => route.id)).eq('is_publicly_selected', true).eq('is_privacy_hidden', false)
     if (!photoError) {
       for (const photo of photos ?? []) {
         const routeId = String(photo.route_id)
@@ -91,18 +94,22 @@ export async function getSourceRunGeometry(runId: number | string) {
   return data as { geojson: unknown; polyline: string | null; started_at: string | null; created_at: string | null } | null
 }
 
-export async function getRoutePhotos(routeId: number | string) {
+export async function getRoutePhotos(routeId: number | string, ownerView = false) {
   const { data, error } = await supabase
     .from('route_spot_photos')
-    .select('id,image_url,thumb_url,taken_at,lat,lng,run_photo_id,sort_order,is_privacy_hidden,marker_id')
+    .select('id,image_url,thumb_url,public_image_url,is_publicly_selected,taken_at,lat,lng,run_photo_id,sort_order,is_privacy_hidden,marker_id')
     .eq('route_id', routeId)
     .order('sort_order', { ascending: true })
     .order('taken_at', { ascending: true })
   if (error) throw error
-  return Promise.all(((data ?? []) as Omit<RoutePhoto, 'image_path' | 'thumb_path'>[]).map(async (photo) => {
-    const imageUrl = await signedPhotoUrl(photo.image_url)
-    const thumbUrl = await signedPhotoUrl(photo.thumb_url)
-    return { ...photo, image_path: photo.image_url, thumb_path: photo.thumb_url, image_url: imageUrl || photo.image_url, thumb_url: thumbUrl || imageUrl }
+  return Promise.all((data ?? []).map(async (photo) => {
+    const publicUrl = await signedPhotoUrl(photo.public_image_url)
+    const imageUrl = ownerView ? await signedPhotoUrl(photo.image_url) : publicUrl
+    const thumbUrl = ownerView ? await signedPhotoUrl(photo.thumb_url) : publicUrl
+    return { ...photo, image_path: photo.image_url, thumb_path: photo.thumb_url,
+      public_image_path: photo.public_image_url, public_image_signed_url: publicUrl,
+      image_url: imageUrl || publicUrl || '', thumb_url: thumbUrl || imageUrl || publicUrl,
+    } satisfies RoutePhoto
   }))
 }
 
@@ -128,6 +135,9 @@ export async function getRunPhotos(runId: number | string) {
       run_photo_id: String(photo.id),
       sort_order: index,
       is_privacy_hidden: false,
+      is_publicly_selected: false,
+      public_image_path: null,
+      public_image_signed_url: null,
       marker_id: null,
     } satisfies RoutePhoto
   }))
