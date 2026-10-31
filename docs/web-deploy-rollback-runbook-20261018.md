@@ -7,13 +7,13 @@
 | 環境 | 公開リポジトリ | 現在の成功コミット | 成功Actions実行 | デプロイID |
 | --- | --- | --- | --- | --- |
 | 本番扱い | `heinekogit/cycling-book-Web` | `e530779`（5-4の無料上限表示） | [40173527767](https://github.com/heinekogit/cycling-book-Web/actions/runs/40173527767) | `7310168764` |
-| 開発 | `heinekogit/cycling-book-web-dev` | `19b6659`（5-4の無料上限表示） | [40160742583](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/40160742583) | `7308393565` |
+| 開発 | `heinekogit/cycling-book-web-dev` | `5af39a9`（6-4の写真公開選択） | [41198702428](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/41198702428) | `7458219892` |
 
-2026-10-25時点で両デプロイは`success`。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。本番トップの公開ルート5件表示も確認した。ログイン後の本番Web操作は未確認。
+本番は2026-10-25時点、開発は2026-10-31時点で各デプロイの`success`を確認。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。本番トップの公開ルート5件表示も確認した。ログイン後の本番Web操作は未確認。
 
 ```bash
 npm run check:pages -- production e530779
-npm run check:pages -- development 19b6659
+npm run check:pages -- development 5af39a9
 ```
 
 この表は今後のデプロイごとに更新する。**切り戻し先は「直近のコミット」ではなく、動作確認済みの成功デプロイ**から選ぶ。

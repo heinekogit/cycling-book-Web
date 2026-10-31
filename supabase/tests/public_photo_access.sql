@@ -106,4 +106,19 @@ begin
 end;
 $$;
 
+reset role;
+update public.route_spot_photos set is_privacy_hidden = false
+where id = '00000000-0000-4000-8000-000000993111';
+update public.routes set is_public = false where id = -993101;
+set local role anon;
+do $$
+begin
+  if exists (select 1 from public.route_spot_photos where route_id = -993101)
+    or exists (select 1 from storage.objects where bucket_id = 'route-photos'
+      and name like 'routes/-993101/%') then
+    raise exception 'Unpublished route still exposes a photo';
+  end if;
+end;
+$$;
+
 rollback;
