@@ -9,6 +9,7 @@
 - `supabase/tests/public_photo_access.sql` を適用前・適用後に実行し、いずれも末尾のROLLBACKを確認した。合成の所有者・別ユーザー・匿名ロールで、所有者は元画像2件と公開コピーを読める一方、別ユーザーと匿名は公開選択した写真1件とその公開コピーのみを読めた。500m除外フラグを立てた場合とルートを非公開にした場合は匿名取得が0件になった。合成ユーザー・DB行・Storage行は残していない。
 - Webソースコミット `8152a4c` は `develop`。開発Pagesコミット `5af39a9`、[Actions実行 41198702428](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/41198702428)、デプロイ `7458219892` は成功。`npm run lint`、`npm run build`、`npm run check:pages -- development 5af39a9` を通し、HTTPS・SPA fallback・開発Supabase接続を確認した。
 - 開発版の非公開ルートID `4`に残っていた合成PNGは初期値で非公開。公開対象に選ぶと別のJPEGコピーがStorageにでき、ルートを非公開にしたり選択を解除したりするとコピーが消えた。
+- 後続確認で本番の削除済み写真行が旧一覧に残ることを発見し、Webの写真取得・件数から`deleted_at`設定済み行を除外した。開発Pages `5f04505`へ更新し、[Actions 41204431227](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/41204431227)と`check:pages`の成功を確認した。本番影響と切替順序は`photo-public-production-release-plan-20261031.md`を参照。
 - 仮ホーム地点（35.682, 139.730）から約132mのルートを500m除外ONで一時公開。選択済み写真でも匿名RESTで写真0件、元画像・公開コピーのStorage取得は拒否された。500m除外OFFで写真未選択のまま一時公開すると、匿名RESTで写真0件。選択後は写真1件、公開コピーの匿名取得HTTP 200、元画像の取得はHTTP 400（Storage応答の内部コードは `NoSuchKey`）。所有者の公開表示は選択した1枚だけ、元の表示は全写真を示した。
 - 追加試験として、`Exif` セグメントと架空の `SyntheticExif` タグを含む64×64pxの合成JPEGをWeb画面から既存マーカーへ追加。公開ルート上でも新規写真は初期値で非公開。これだけを公開選択したとき、匿名から取得した公開用JPEGは1,032バイトで、`Exif` セグメントも合成タグも含まなかった。元ファイルには両方含まれていた。もう1枚の非選択写真は匿名RESTに現れなかった。
 - 終了時にルートID `4`を非公開へ戻し、新規EXIF試験写真を削除。仮ホーム地点も空欄に戻し、再読み込みで空欄を確認。DBでルート非公開、写真行1件（以前からの合成PNG）、公開選択0件、公開用Storageコピー0件、マーカー元画像1件を確認した。
