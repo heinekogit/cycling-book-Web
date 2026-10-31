@@ -1,5 +1,7 @@
 # 6-4 写真公開変更の本番切替準備（2026-10-31）
 
+**2026-11-01追記:** 以下は切替前に作った計画と当時の状態を残したもの。本番DBへのSQL適用とWebのPRマージ・Pages公開は完了した。実行結果と未完了の所有者画面・iOS確認は[本番反映記録](photo-public-production-rollout-20261101.md)を参照。
+
 本書は**準備と順序**の記録。写真公開選択のSQLは開発DBにだけ適用済み。本番扱いSupabase `cqiqhczxuiyakptdjowr`には、利用者の決定に基づきルート33の既存写真2行を`is_privacy_hidden=true`にする限定変更を2026-10-31に適用した（`route33-photo-privacy-change-20261031.md`）。本番WebとiOS公開ビルド、マイグレーション履歴は未変更。
 
 **同日追加:** 本番向けWeb候補を`release/photo-public-choice`に隔離し、[Draft PR #2](https://github.com/heinekogit/cycling-book-Web/pull/2)を作成。写真公開選択と削除済み写真除外だけを、既に本番mainへ取り込まれた無料枠変更の上に載せた。競合した2画面を解消し、公開プレビューが元画像へリンクしないよう補完した。最新mainの取り込み後、写真一覧でサムネイルを切り替えても公開プレビューを維持する修正を加えた候補は`9b73d13`。`npm ci --offline`、`npm run build`、`npm run lint`は成功。本番DBでは予定SQLと合成2ユーザー・匿名試験を単一トランザクションで実行し、`ROLLBACK`を確認した。再照合で履歴`20261025000200`なし、新列なし、ルート33の写真2行とも非公開のまま。本番適用・PRマージ・Pagesデプロイは未実施。
