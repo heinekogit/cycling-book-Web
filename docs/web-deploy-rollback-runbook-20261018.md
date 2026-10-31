@@ -6,13 +6,13 @@
 
 | 環境 | 公開リポジトリ | 現在の成功コミット | 成功Actions実行 | デプロイID |
 | --- | --- | --- | --- | --- |
-| 本番扱い | `heinekogit/cycling-book-Web` | `6224395`（写真ごとの公開選択） | [41241703322](https://github.com/heinekogit/cycling-book-Web/actions/runs/41241703322) | `7464341666` |
+| 本番扱い | `heinekogit/cycling-book-Web` | `72c8dfb`（旧形式写真の所有者アクセス補正SQL） | [41244915359](https://github.com/heinekogit/cycling-book-Web/actions/runs/41244915359) | `7464797111` |
 | 開発 | `heinekogit/cycling-book-web-dev` | `5f04505`（6-4の削除済み写真除外） | [41204431227](https://github.com/heinekogit/cycling-book-web-dev/actions/runs/41204431227) | `7459042102` |
 
-本番は2026-11-01時点、開発は2026-10-31時点で各デプロイの`success`を確認。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。本番トップの公開ルート5件表示は旧版で確認した。本番の写真ページは未ログインで0枚を確認。ログイン後の本番Web操作は確認待ち。
+本番は2026-11-01時点、開発は2026-10-31時点で各デプロイの`success`を確認。公開URL、SPAの`404.html`、公開JS内のSupabase参照を次の読み取り専用コマンドで検証した。本番トップの公開ルート5件表示は旧版で確認した。本番のルート33写真ページは未ログインで0枚、所有者ログイン後は有効な写真1枚と元画像の表示を確認した。
 
 ```bash
-npm run check:pages -- production 6224395
+npm run check:pages -- production 72c8dfb
 npm run check:pages -- development 5f04505
 ```
 

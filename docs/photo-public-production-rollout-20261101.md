@@ -27,4 +27,6 @@
 
 `20261101000100_legacy_route_photo_owner_access.sql`では、旧形式のファイル名を写真行の元画像・サムネイル参照と厳密一致させ、同じルートアカウントの所有者だけにアクセスを追加した。新形式の判定は維持する。本番で単一トランザクションの事前試験後に`ROLLBACK`し、所有者1件、別ユーザー0件、匿名0件を確認。開発DB、本番DBの順に各一度だけ適用し、履歴は両方とも1行。適用後の読み取り専用再試験も所有者1件、別ユーザー0件、匿名0件だった。所有者ブラウザで再読み込み後に11:06の写真が表示されたことを確認した。
 
+[本番リポジトリのPR #3](https://github.com/heinekogit/cycling-book-Web/pull/3)は必須`verify`成功後に`main`へマージした。マージSHA`72c8dfb`、[Pages Actions 41244915359](https://github.com/heinekogit/cycling-book-Web/actions/runs/41244915359)成功、デプロイ`7464797111`。`npm run check:pages -- production 72c8dfb`でHTTPS、SPA、本番Supabase参照が正常。Web動作コードは変更していない。
+
 以前発行された署名URLや第三者の保存済み画像・キャッシュは回収できない。旧Webへの切り戻しは新DBの列と公開用コピーの扱いが合わないため、障害時はまず前進修正を検討する。iOSの公開候補は[Draft PR #1](https://github.com/heinekogit/cycling-book-app/pull/1)に残り、TestFlight実機確認前に一般公開しない。
