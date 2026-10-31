@@ -16,7 +16,7 @@
 ## 残る公開前作業
 
 1. 本番DB・Webへの同一マイグレーションとコードの反映は、別途リリース手順で行う。旧版Webは新列を読まないが、DB適用後は従来の公開写真が初期値で非公開になるため、公開写真の表示変化と利用者への案内を先に確認する。
-2. iOS公開候補で写真選択・公開画像の見え方を確認する。Webのブラウザ変換は今回Chromeで実測した。Safariと画像形式ごとの再描画は未確認。
+2. iOS公開候補で公開画像の見え方を確認する。iOSの読み込み処理と既存公開写真1枚への影響は `photo-public-ios-and-legacy-review-20261031.md` に記録した。Webのブラウザ変換は今回Chromeで実測した。Safariと画像形式ごとの再描画は未確認。
 3. 公開用画像を解除するとStorageオブジェクトは削除されるが、既に取得された画像やキャッシュを回収することはできない。署名付きURLは現在1時間で、即時の閲覧不能を保証する文言は避ける。Supabaseは[認証付きStorage応答のキャッシュ](https://supabase.com/kb/troubleshooting/storage-private-bucket-files-still-accessible-after-remove-access-or-logout)に注意を促している。
 4. 写真を含むルート・実走・アカウント全体の削除とStorageオブジェクトの整合は6-6で扱う。利用規約・プライバシーポリシーの確定、お問い合わせ窓口も別途必要。
 
