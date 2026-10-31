@@ -52,7 +52,7 @@ export function RoutePhotosPage() {
       {selected ? <>
         <figure className="photo-viewer-main"><img src={selected.image_url} alt={t('photos.alt', { date: formatTakenAt(selected.taken_at) })} /><figcaption>{formatTakenAt(selected.taken_at)}</figcaption></figure>
         <div className="photo-viewer-thumbs" aria-label={t('photos.select')}>
-          {visiblePhotos.map((photo) => <button type="button" className={String(photo.id) === String(selected.id) ? 'active' : ''} onClick={() => setSearchParams({ photo: String(photo.id) }, { replace: true })} key={photo.id}><img src={photo.thumb_url || photo.image_url} alt={formatTakenAt(photo.taken_at)} /></button>)}
+          {visiblePhotos.map((photo) => <button type="button" className={String(photo.id) === String(selected.id) ? 'active' : ''} onClick={() => setSearchParams((current) => { const next = new URLSearchParams(current); next.set('photo', String(photo.id)); return next }, { replace: true })} key={photo.id}><img src={photo.thumb_url || photo.image_url} alt={formatTakenAt(photo.taken_at)} /></button>)}
         </div>
       </> : <div className="panel-muted">{t('photos.empty')}</div>}
       <Link className="button button-quiet photo-route-link" to={`/routes/${route.id}`}>{t('photos.backToRoute')}</Link>
