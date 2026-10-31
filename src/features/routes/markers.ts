@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabase'
 import { signedPhotoUrl } from './api'
 import { distanceMeters, minimumDistanceToTrackMeters, type TrackPoint } from './geometry'
 
-export type MarkerPhoto = { id: string; imagePath: string; imageUrl: string; thumbUrl: string; sortOrder: number }
+export type MarkerPhoto = { id: string; imagePath: string; imageUrl: string; thumbUrl: string; sortOrder: number; publicImagePath?: string | null; publicImageUrl?: string | null; isPubliclySelected?: boolean }
 export type RouteMarker = { id: string; lat: number; lng: number; comment: string; photos: MarkerPhoto[]; isPrivacyHidden: boolean }
 export type EditableMarker = RouteMarker & { newPhotos: File[] }
 
@@ -22,21 +22,26 @@ export function markerNearRoute(point: TrackPoint, routeLine: TrackPoint[]) {
   return minimumDistanceToTrackMeters(point, routeLine) <= 500 || insideLoop(point, routeLine)
 }
 
-export async function getRouteMarkers(routeId: string | number): Promise<RouteMarker[]> {
+export async function getRouteMarkers(routeId: string | number, ownerView = false): Promise<RouteMarker[]> {
   const { data: markerRows, error } = await supabase.from('route_markers')
     .select('id,latitude,longitude,comment,is_privacy_hidden').eq('route_id', routeId).order('sort_order')
   if (error) throw error
   const ids = (markerRows ?? []).map((row) => row.id)
   const { data: photoRows, error: photoError } = ids.length
-    ? await supabase.from('route_spot_photos').select('id,marker_id,image_url,thumb_url,sort_order').in('marker_id', ids).order('sort_order')
+    ? await supabase.from('route_spot_photos').select('id,marker_id,image_url,thumb_url,public_image_url,is_publicly_selected,sort_order').in('marker_id', ids).order('sort_order')
     : { data: [], error: null }
   if (photoError) throw photoError
-  const photos = await Promise.all((photoRows ?? []).map(async (row) => ({
-    markerId: String(row.marker_id), id: String(row.id), imagePath: String(row.image_url),
-    imageUrl: await signedPhotoUrl(row.image_url) || String(row.image_url),
-    thumbUrl: await signedPhotoUrl(row.thumb_url) || await signedPhotoUrl(row.image_url) || String(row.image_url),
-    sortOrder: Number(row.sort_order || 0),
-  })))
+  const photos = await Promise.all((photoRows ?? []).map(async (row) => {
+    const publicUrl = await signedPhotoUrl(row.public_image_url)
+    const imageUrl = ownerView ? await signedPhotoUrl(row.image_url) : publicUrl
+    const thumbUrl = ownerView ? await signedPhotoUrl(row.thumb_url) : publicUrl
+    return {
+      markerId: String(row.marker_id), id: String(row.id), imagePath: String(row.image_url),
+      imageUrl: imageUrl || publicUrl || '', thumbUrl: thumbUrl || imageUrl || publicUrl || '',
+      publicImagePath: row.public_image_url, publicImageUrl: publicUrl, isPubliclySelected: row.is_publicly_selected,
+      sortOrder: Number(row.sort_order || 0),
+    }
+  }))
   return (markerRows ?? []).map((row) => ({
     id: String(row.id), lat: Number(row.latitude), lng: Number(row.longitude), comment: String(row.comment || ''),
     isPrivacyHidden: Boolean(row.is_privacy_hidden),
@@ -45,11 +50,11 @@ export async function getRouteMarkers(routeId: string | number): Promise<RouteMa
 }
 
 export async function saveRouteMarkers(routeId: string | number, markers: EditableMarker[], userId: string) {
-  const existing = await getRouteMarkers(routeId)
+  const existing = await getRouteMarkers(routeId, true)
   const nextIds = new Set(markers.map((marker) => marker.id))
   for (const marker of existing) {
     if (nextIds.has(marker.id)) continue
-    const paths = marker.photos.map((photo) => photo.imagePath).filter((path) => path.startsWith(`routes/${routeId}/`))
+    const paths = marker.photos.flatMap((photo) => [photo.imagePath, photo.publicImagePath]).filter((path): path is string => Boolean(path?.startsWith(`routes/${routeId}/`)))
     if (paths.length) await supabase.storage.from('route-photos').remove(paths)
     const { error } = await supabase.from('route_markers').delete().eq('id', marker.id).eq('route_id', routeId)
     if (error) throw error
@@ -66,7 +71,8 @@ export async function saveRouteMarkers(routeId: string | number, markers: Editab
       if (kept.has(photo.id)) continue
       const { error: deleteError } = await supabase.from('route_spot_photos').delete().eq('id', photo.id).eq('marker_id', marker.id)
       if (deleteError) throw deleteError
-      if (photo.imagePath.startsWith(`routes/${routeId}/`)) await supabase.storage.from('route-photos').remove([photo.imagePath])
+      const paths = [photo.imagePath, photo.publicImagePath].filter((path): path is string => Boolean(path?.startsWith(`routes/${routeId}/`)))
+      if (paths.length) await supabase.storage.from('route-photos').remove(paths)
     }
     for (const [sortOrder, photo] of marker.photos.entries()) {
       const { error: orderError } = await supabase.from('route_spot_photos').update({ sort_order: sortOrder, lat: marker.lat, lng: marker.lng }).eq('id', photo.id).eq('marker_id', marker.id)
@@ -85,7 +91,7 @@ export async function saveRouteMarkers(routeId: string | number, markers: Editab
       if (photoError) { await supabase.storage.from('route-photos').remove([path]); throw photoError }
     }
   }
-  const saved = await getRouteMarkers(routeId)
+  const saved = await getRouteMarkers(routeId, true)
   for (const marker of markers) {
     const savedMarker = saved.find((item) => item.id === marker.id)
     if (!savedMarker || savedMarker.photos.length !== marker.photos.length + marker.newPhotos.length) {
