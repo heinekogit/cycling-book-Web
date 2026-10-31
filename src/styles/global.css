@@ -166,6 +166,13 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .photo-viewer-thumbs button { flex: 0 0 84px; height: 64px; overflow: hidden; padding: 0; border: 3px solid transparent; border-radius: 10px; background: #e7ece6; cursor: pointer; opacity: .7; }
 .photo-viewer-thumbs button.active { border-color: #2b7950; opacity: 1; }
 .photo-viewer-thumbs img { width: 100%; height: 100%; object-fit: cover; }
+.photo-public-settings { margin: 18px 0; }
+.photo-public-settings h2 { margin: 0 0 8px; color: #173f2b; font-size: 1.25rem; }
+.photo-public-settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+.photo-public-settings-card { display: grid; gap: 8px; align-content: start; }
+.photo-public-settings-card img { width: 100%; aspect-ratio: 4 / 3; border-radius: 10px; object-fit: cover; }
+.photo-public-settings-card button { min-height: 44px; padding: 8px; border: 1px solid #b8c9ba; border-radius: 10px; background: #fff; color: #173f2b; cursor: pointer; }
+.photo-public-settings-card button[aria-pressed="true"] { border-color: #2b7950; background: #e7f3e9; }
 .photo-route-link { margin: 18px clamp(18px, 4vw, 36px) 24px; }
 .detail-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 32px 0; overflow: hidden; border: 1px solid #e1e7df; border-radius: 16px; background: #e1e7df; }
 .detail-facts div { padding: 18px; background: #f9fbf8; }

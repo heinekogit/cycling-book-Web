@@ -148,13 +148,13 @@ export function RouteEditorPage() {
         const privateGeometry = route.is_public ? await getPrivateRouteGeometry(route.id) : null
         const points = extractRoutePoints(privateGeometry || route)
         initial = { ...initial, name: route.name || '', description: route.description || '', isPublic: false, sourceRunId: route.source_run_id == null ? null : String(route.source_run_id), routeLine: points, controlPoints: deriveControlPoints(privateGeometry?.geojson ?? route.geojson, points), distanceM: privateGeometry?.distance_m ?? route.distance_m }
-        initialMarkers = (await getRouteMarkers(route.id)).map((marker) => ({ ...marker, newPhotos: [] }))
+        initialMarkers = (await getRouteMarkers(route.id, true)).map((marker) => ({ ...marker, newPhotos: [] }))
         if (route.source_run_id != null) {
           const run = await getRun(String(route.source_run_id))
           const legacyRoute = run ? await getLegacyRouteForRun(accountId, run.started_at || run.created_at) : null
           const [legacyPhotos, savedPhotos] = await Promise.all([
-            legacyRoute && String(legacyRoute.id) !== String(route.id) ? getRoutePhotos(legacyRoute.id) : Promise.resolve([]),
-            getRoutePhotos(route.id),
+            legacyRoute && String(legacyRoute.id) !== String(route.id) ? getRoutePhotos(legacyRoute.id, true) : Promise.resolve([]),
+            getRoutePhotos(route.id, true),
           ])
           initialPhotoCandidates = await getRunPhotoCandidates(route.source_run_id, legacyPhotos)
           const savedPathOrder = new Map<string, number>()
@@ -189,7 +189,7 @@ export function RouteEditorPage() {
         if (!run || String(run.account_id) !== String(accountId)) throw new Error('マイルート化する実走ログが見つかりません')
         const runPoints = extractRoutePoints(run)
         const photoRoute = accountId == null ? null : await getRouteForRun(run.id, accountId, run.started_at || run.created_at)
-        const photos = photoRoute ? await getRoutePhotos(photoRoute.id) : []
+        const photos = photoRoute ? await getRoutePhotos(photoRoute.id, true) : []
         initialPhotoCandidates = await getRunPhotoCandidates(run.id, photos)
         initialSelectedPhotoKeys = initialPhotoCandidates.map((photo) => photo.key)
         const photoPoints = photos.filter((photo) => Number.isFinite(Number(photo.lat)) && Number.isFinite(Number(photo.lng))).map((photo) => ({ lat: Number(photo.lat), lng: Number(photo.lng) }))
@@ -437,7 +437,7 @@ export function RouteEditorPage() {
     setMarkerSaveMessage('マーカーと写真を保存しています…')
     try {
       await saveRouteMarkers(routeId, markers, session.user.id)
-      const saved = await getRouteMarkers(routeId)
+      const saved = await getRouteMarkers(routeId, true)
       setMarkers(saved.map((marker) => ({ ...marker, newPhotos: [] })))
       const key = draftKey(routeId, sourceRunParam, duplicateRouteParam)
       localStorage.removeItem(key)
