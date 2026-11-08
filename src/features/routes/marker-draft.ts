@@ -49,3 +49,17 @@ export async function deleteMarkerFilesDraft(key: string) {
     })
   } finally { database.close() }
 }
+
+/** Older draft keys contain no user ID, so withdrawal clears this app's whole draft store. */
+export async function clearMarkerFilesDrafts() {
+  const database = await openDatabase()
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction(storeName, 'readwrite')
+      transaction.objectStore(storeName).clear()
+      transaction.oncomplete = () => resolve()
+      transaction.onerror = () => reject(transaction.error)
+      transaction.onabort = () => reject(transaction.error)
+    })
+  } finally { database.close() }
+}

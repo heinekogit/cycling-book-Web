@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { deletePersonalAccountWithData } from '../features/accounts/delete-account'
 import { useLocale } from '../features/i18n/LocaleProvider'
+import { clearLocalRouteDrafts } from '../features/routes/clear-local-drafts'
 import { supabase } from '../lib/supabase'
 
 export function DeleteAccountPage() {
@@ -41,9 +42,21 @@ export function DeleteAccountPage() {
       return
     }
 
-    window.localStorage.removeItem(`cycling-book.active-account.${session.user.id}`)
     await supabase.auth.signOut({ scope: 'local' })
-    navigate('/signup?withdrawn=1', { replace: true })
+    let localCleanupFailed = false
+    try {
+      await clearLocalRouteDrafts()
+    } catch (error) {
+      console.error('退会後のローカル下書きを削除できませんでした', error)
+      localCleanupFailed = true
+    }
+    try {
+      window.localStorage.removeItem(`cycling-book.active-account.${session.user.id}`)
+    } catch (error) {
+      console.error('退会後のアカウント選択を削除できませんでした', error)
+      localCleanupFailed = true
+    }
+    navigate(localCleanupFailed ? '/signup?withdrawn=1&localCleanup=failed' : '/signup?withdrawn=1', { replace: true })
   }
 
   if (isLoading) return <main className="narrow-page"><section className="form-card"><p>{t('profileSettings.loading')}</p></section></main>
