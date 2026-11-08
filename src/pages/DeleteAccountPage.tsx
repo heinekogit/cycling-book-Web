@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { deletePersonalAccountWithData } from '../features/accounts/delete-account'
 import { useLocale } from '../features/i18n/LocaleProvider'
 import { supabase } from '../lib/supabase'
 
@@ -30,9 +31,10 @@ export function DeleteAccountPage() {
       return
     }
 
-    const { error: deleteError } = await supabase.rpc('delete_my_empty_account')
-    if (deleteError) {
-      setErrorMessage(deleteError.message.includes('Account contains records or files')
+    try {
+      await deletePersonalAccountWithData()
+    } catch (error) {
+      setErrorMessage(error instanceof Error && error.message.includes('Shared or external account data')
         ? t('deleteAccount.hasData')
         : t('deleteAccount.failed'))
       setIsSubmitting(false)
