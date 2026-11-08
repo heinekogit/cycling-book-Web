@@ -220,7 +220,7 @@ export function RouteEditorPage() {
   }, [duplicateRouteParam, isAuthLoading, routeId, session?.user.id, sourceRunParam])
 
   useEffect(() => {
-    if (!dirty || status === 'loading' || status === 'saving') return
+    if (!session?.user.id || !dirty || status === 'loading' || status === 'saving') return
     const timeout = window.setTimeout(() => {
       const draft: Draft = { name, description, isPublic, controlPoints, routeLine, lockedRouteLine, segmentStartIndex, drawMode, travelMode, routeId: routeId || null, sourceRunId, distanceM: sourceDistanceM, markers: savedMarkerMetadata(markers) }
       const key = draftKey(routeId, sourceRunParam, duplicateRouteParam)
@@ -229,7 +229,7 @@ export function RouteEditorPage() {
       }).catch((error) => console.warn('写真の自動下書きを保存できませんでした', error))
     }, 700)
     return () => window.clearTimeout(timeout)
-  }, [controlPoints, description, dirty, drawMode, duplicateRouteParam, isPublic, lockedRouteLine, markers, name, routeId, routeLine, segmentStartIndex, sourceDistanceM, sourceRunId, sourceRunParam, status, travelMode])
+  }, [controlPoints, description, dirty, drawMode, duplicateRouteParam, isPublic, lockedRouteLine, markers, name, routeId, routeLine, segmentStartIndex, session?.user.id, sourceDistanceM, sourceRunId, sourceRunParam, status, travelMode])
 
   const commit = useCallback((nextControlPoints: TrackPoint[], nextRouteLine: TrackPoint[], nextLockedRouteLine: TrackPoint[], nextSegmentStartIndex: number) => {
     setControlPoints(nextControlPoints); setRouteLine(nextRouteLine)
