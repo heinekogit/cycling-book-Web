@@ -6,7 +6,7 @@ import { EditorElevationPreview } from '../features/elevation/EditorElevationPre
 import { getAccountId } from '../features/auth/account'
 import { useAuth } from '../features/auth/AuthProvider'
 import { RouteEditorMap, type EditorTool } from '../features/maps/RouteEditorMap'
-import { searchJapaneseLocation } from '../features/maps/geocoding'
+import { searchLocationIQ, type LocationCandidate } from '../features/maps/locationiq'
 import { getProfile } from '../features/profile/api'
 import { createRoute, getRunPhotoCandidates, saveRoutePhotoSelections, updateRoute, type RoutePhotoCandidate } from '../features/routes/editor-api'
 import { extractRoutePoints, simplifyTrack, totalDistanceMeters, type TrackPoint } from '../features/routes/geometry'
@@ -106,6 +106,7 @@ export function RouteEditorPage() {
   const [placeQuery, setPlaceQuery] = useState('')
   const [locationStatus, setLocationStatus] = useState<'idle' | 'searching'>('idle')
   const [locationMessage, setLocationMessage] = useState('')
+  const [locationCandidates, setLocationCandidates] = useState<LocationCandidate[]>([])
   const [tool, setTool] = useState<EditorTool>('add')
   const [drawMode, setDrawMode] = useState<DrawMode>('snap')
   const [moveMode, setMoveMode] = useState<DrawMode>('snap')
@@ -123,6 +124,7 @@ export function RouteEditorPage() {
   const [markerSaveMessage, setMarkerSaveMessage] = useState('')
   const pendingSavedRouteId = useRef<string | number | null>(null)
   const routingSequence = useRef(0)
+  const locationSearchSequence = useRef(0)
 
   useEffect(() => {
     if (isAuthLoading || !session?.user.id) return
@@ -372,16 +374,21 @@ export function RouteEditorPage() {
   }
 
   const showLocation = async (place: string, selectedPrefecture = prefecture) => {
+    const searchSequence = ++locationSearchSequence.current
     const query = [selectedPrefecture, place.trim()].filter(Boolean).join(' ')
     if (!query) { setLocationMessage('都道府県または地名を入力してください。'); return }
+    setLocationCandidates([])
     setLocationStatus('searching'); setLocationMessage('地域を検索しています…')
     try {
-      const result = await searchJapaneseLocation(query)
-      setCenter(result.point); setFocusVersion((value) => value + 1); setLocationMessage(`${result.label}を表示しました。`)
+      const candidates = await searchLocationIQ(query)
+      if (searchSequence !== locationSearchSequence.current) return
+      setLocationCandidates(candidates)
+      setLocationMessage(candidates.length ? '候補を確認して、地図に表示する場所を選んでください。' : '候補が見つかりませんでした。地名や住所を変えてお試しください。')
     } catch (error) {
+      if (searchSequence !== locationSearchSequence.current) return
       console.warn('地域を検索できませんでした', error)
-      setLocationMessage('地域が見つかりませんでした。地名や住所を変えてお試しください。')
-    } finally { setLocationStatus('idle') }
+      setLocationMessage(error instanceof Error && error.message === 'LocationIQ rate limit exceeded' ? '検索回数の上限に達しました。少し待って再試行してください。' : '地域を検索できませんでした。時間を置いて再試行してください。')
+    } finally { if (searchSequence === locationSearchSequence.current) setLocationStatus('idle') }
   }
 
   const save = async () => {
@@ -487,10 +494,13 @@ export function RouteEditorPage() {
   return <main className="route-editor-page">
     <header className="editor-header"><div><p className="eyebrow">ROUTE BUILDER</p><h1>{routeId ? 'マイルートを編集' : duplicateRouteParam ? 'マイルートを複製して編集' : sourceRunId ? '実走ログをマイルートにする' : 'マイルートを作る'}</h1></div><div className="editor-header-actions"><Link className="button button-quiet" to={routeId ? `/routes/${routeId}` : duplicateRouteParam ? `/routes/${duplicateRouteParam}` : sourceRunId ? `/runs/${sourceRunId}` : '/mypage'}>戻る</Link><button className="button button-primary" type="button" onClick={() => void save()} disabled={status === 'saving' || status === 'routing' || markerSaving}>{status === 'saving' || markerSaving ? '保存中…' : routeId ? '更新する' : sourceRunId ? 'この内容で作成' : '保存する'}</button></div></header>
     <form className="editor-location-search" onSubmit={(event) => { event.preventDefault(); void showLocation(placeQuery) }}>
-      <label><span>都道府県</span><select value={prefecture} onChange={(event) => { const next = event.target.value; setPrefecture(next); if (next) void showLocation('', next) }}><option value="">選択してください</option>{prefectures.map((item) => <option value={item} key={item}>{item}</option>)}</select></label>
-      <label><span>地名・住所</span><input value={placeQuery} onChange={(event) => setPlaceQuery(event.target.value)} placeholder="市区町村、駅名、住所など" /></label>
-      <button className="button button-primary" type="submit" disabled={locationStatus === 'searching'}>{locationStatus === 'searching' ? '検索中…' : '地図を表示'}</button>
+      <label><span>都道府県</span><select value={prefecture} onChange={(event) => { setPrefecture(event.target.value); setLocationCandidates([]); setLocationMessage(''); setLocationStatus('idle'); locationSearchSequence.current += 1 }}><option value="">選択してください</option>{prefectures.map((item) => <option value={item} key={item}>{item}</option>)}</select></label>
+      <label><span>地名・住所</span><input value={placeQuery} onChange={(event) => { setPlaceQuery(event.target.value); setLocationCandidates([]); setLocationMessage(''); setLocationStatus('idle'); locationSearchSequence.current += 1 }} placeholder="市区町村、駅名、住所など" /></label>
+      <button className="button button-primary" type="submit" disabled={locationStatus === 'searching'}>{locationStatus === 'searching' ? '検索中…' : '候補を検索'}</button>
       {locationMessage && <p role="status">{locationMessage}</p>}
+      <p>候補の名前と地図上の位置を確認してください。番地付き住所は一致しない場合があります。</p>
+      {locationCandidates.length > 0 && <div className="editor-location-candidates" aria-label="検索候補">{locationCandidates.map((candidate, index) => <button key={`${candidate.point.lat}-${candidate.point.lng}-${index}`} type="button" onClick={() => { setCenter(candidate.point); setFocusVersion((value) => value + 1); setLocationMessage(`${candidate.label}を表示しました。`) }}><strong>{candidate.label}</strong>{candidate.kind && <small>{candidate.kind}</small>}<span>地図に表示</span></button>)}</div>}
+      <a className="editor-location-attribution" href="https://locationiq.com/" target="_blank" rel="noreferrer">Search by LocationIQ.com</a>
     </form>
     <section className="editor-name-row"><label htmlFor="route-name">ルート名</label><input id="route-name" maxLength={120} value={name} onChange={(event) => { setName(event.target.value); setDirty(true) }} placeholder="新しいルート" /><div><strong>{((sourceDistanceM ?? distance) / 1000).toFixed(2)} km</strong><span>{controlPoints.length}ポイント</span></div></section>
     <section className="editor-route-settings"><label htmlFor="route-description"><span>説明</span><textarea id="route-description" maxLength={1000} value={description} onChange={(event) => { setDescription(event.target.value); setDirty(true) }} placeholder="ルートの特徴や見どころ" /></label><p>ルートは非公開で保存されます。保存後の公開前確認で、プライバシーゾーンを設定できます。</p>{sourceRunId && <p>実走ログ #{sourceRunId} の軌跡を10m精度で整理しています。写真付近の地点は保持されます。</p>}</section>
