@@ -303,6 +303,13 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .editor-location-search select:focus, .editor-location-search input:focus { border-color: #4f8964; box-shadow: 0 0 0 3px rgba(79,137,100,.12); }
 .editor-location-search .button { min-height: 42px; }
 .editor-location-search > p { grid-column: 1 / -1; margin: 0; color: #607067; font-size: 12px; }
+.editor-location-candidates { grid-column: 1 / -1; display: grid; gap: 7px; }
+.editor-location-candidates button { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; width: 100%; padding: 10px 12px; border: 1px solid #d9e2d8; border-radius: 10px; background: #fbfcfa; color: #173f2b; text-align: left; cursor: pointer; }
+.editor-location-candidates button:hover, .editor-location-candidates button:focus-visible { border-color: #4f8964; background: #edf6ee; }
+.editor-location-candidates button strong { flex: 1; font-size: 13px; font-weight: 700; }
+.editor-location-candidates button small { color: #607067; }
+.editor-location-candidates button span { color: #356d4d; font-size: 12px; white-space: nowrap; }
+.editor-location-attribution { grid-column: 1 / -1; justify-self: end; color: #356d4d; font-size: 12px; font-weight: 700; }
 .editor-name-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; margin-bottom: 12px; padding: 14px 16px; border: 1px solid #d9e2d8; border-radius: 16px; background: #fff; }
 .editor-name-row > label { color: #68756c; font-size: 11px; font-weight: 800; }
 .editor-name-row > input { width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cad6ca; border-radius: 10px; color: #17221b; background: #fbfcfa; outline: none; }

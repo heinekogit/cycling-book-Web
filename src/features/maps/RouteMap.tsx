@@ -28,7 +28,7 @@ export function RouteMap({ points, photos = [], markers = [], trackColor = '#3b8
   const locatedPhotos = photos.filter((photo) => !photo.marker_id && Number.isFinite(Number(photo.lat)) && Number.isFinite(Number(photo.lng)))
   return <div className="route-map-wrap">
     <MapContainer className="route-map" center={[35.681236, 139.767125]} zoom={12} scrollWheelZoom>
-      <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
+      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Routing &copy; <a href="https://www.mapbox.com/">Mapbox</a>' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
       {segments.map((segment, index) => <Polyline key={index} positions={segment.map((point) => [point.lat, point.lng])} pathOptions={{ color: trackColor, weight: 6, opacity: .92 }} />)}
       {onActiveDistanceChange && segments.map((segment, index) => <Polyline key={`hit-${index}`} positions={segment.map((point) => [point.lat, point.lng])} pathOptions={{ color: '#000', weight: 24, opacity: 0 }} eventHandlers={{ mousemove: selectNearest, mouseout: () => onActiveDistanceChange(null), click: selectNearest }} />)}
       {privacyZone && <Circle center={[privacyZone.center.lat, privacyZone.center.lng]} radius={privacyZone.radius} pathOptions={{ color: '#dc2626', weight: 3, fillColor: '#ef4444', fillOpacity: .16, dashArray: '8 7' }} />}

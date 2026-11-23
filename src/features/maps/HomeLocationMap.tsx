@@ -26,7 +26,7 @@ export function HomeLocationMap({ location, onChange }: { location: HomeLocation
 
   return <div className="profile-map-wrap">
     <MapContainer className="profile-map" center={[location?.lat ?? defaultLocation.lat, location?.lng ?? defaultLocation.lng]} zoom={location ? 15 : 13} scrollWheelZoom>
-      <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
+      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
       <MapInteraction location={location} onChange={onChange} />
       {location && <Marker ref={markerRef} position={[location.lat, location.lng]} draggable icon={icon} eventHandlers={handlers} />}
     </MapContainer>

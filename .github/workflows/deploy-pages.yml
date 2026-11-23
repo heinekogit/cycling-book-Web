@@ -24,6 +24,7 @@ jobs:
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
+      VITE_LOCATIONIQ_TOKEN: ${{ secrets.LOCATIONIQ_PUBLIC_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -36,6 +37,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Check public API tokens
+        run: |
+          test -n "$VITE_MAPBOX_TOKEN"
+          test -n "$VITE_LOCATIONIQ_TOKEN"
 
       - name: Build site
         run: npm run build
